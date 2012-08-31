@@ -48,3 +48,6 @@ Icon?
 ehthumbs.db
 Thumbs.db
 *.crc
+_notes/
+*/_notes/
+js/.jshintrc
