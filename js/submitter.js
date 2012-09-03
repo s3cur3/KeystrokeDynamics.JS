@@ -60,6 +60,10 @@ function unMonitor( textBox ) {
  * Binds functions to various events on the page.
  */
 function bind() {
+    // Clear the key phrase, so that if you reloaded
+    // this page, it's not populated with the old data
+    $("#inputKeyPhrase").val('');
+
     $("#inputKeyPhrase").focus(monitor);
     $("#inputKeyPhrase").blur(unMonitor);
 
