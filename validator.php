@@ -90,8 +90,6 @@
 				?>
 			</section>
 		</div><!-- container -->
-		
-		<script src="js/jquery.js"></script>
-		<script src="js/submitter.js"></script>
+		<?php include( 'components/footer.php' ); ?>
 	</body>
 </html>
