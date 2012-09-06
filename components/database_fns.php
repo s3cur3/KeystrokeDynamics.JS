@@ -118,6 +118,42 @@ function cleanse_sql_and_html( $string ) {
 }
 
 /**
+ *
+ * @param $key_phrase The key phrase for which we should 
+ *                    retrieve all known training data.
+ * @return An array of timing data (one element per training instance 
+ *         of the password).
+ */
+function getTrainingData( $key_phrase ) {
+	global $db_hostname, $db_username, $db_password, $db_database, $table_training_data, $table_training_output;
+	
+	$db_server = mysql_connect( $db_hostname, $db_username, $db_password );
+	if ( !$db_server ) die( "<p>Unable to connect to MySQL: " . mysql_error() . '</p>' );
+	
+	// Select the keystroke database
+	mysql_select_db( $db_database ) or die( "Unable to select database: " . mysql_error() );
+	
+	
+	// Prevent SQL injection by using a placeholder query
+	$placeholder_query = 'PREPARE selection FROM "SELECT * from `'. $table_training_data . '` WHERE `key_phrase` = ?;"';
+	mysql_query( $placeholder_query );
+	
+	$set_query = 'SET @key_phrase = "' . $key_phrase . '";';
+	mysql_query( $set_query );
+
+	$execute_query = 'EXECUTE selection USING @key_phrase;';
+	$result = mysql_query( $execute_query ) or die( "<p>Error querying the database.</p>");
+	
+	$deallocate_query = 'DEALLOCATE PREPARE selection;';
+	mysql_query( $deallocate_query );	
+	
+	// Close the connection to the MySQL server
+	mysql_close( $db_server );
+	
+	$query = 'SELECT * FROM `training` WHERE `key_phrase` = "abcdefg"';
+}
+
+/**
  * Dumps the training data to an HTML table. *DO NOT* use if you have a large data set!
  */
 function dump_training_data() {

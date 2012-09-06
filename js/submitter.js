@@ -79,9 +79,9 @@ function bindKeystrokeListener( idToMonitor ) {
 }
 
 SubmitType = {
-    CREATE : formCreate,
-    LOGIN : formLogin,
-    TRAIN : formTrain
+    CREATE : 'formCreate',
+    LOGIN : 'formLogin',
+    TRAIN : 'formTrain'
 }
 
 /**
@@ -109,9 +109,12 @@ function handleSubmission( submitType ) {
             // If the password was wrong, inform the user
             if( phrase.val() != phrase.attr('placeholder') ) {
                 $("#inputKeyPhraseHelp").html("Sorry, you need to type your key phrase <strong>exactly as before.</strong>")
-                phrase.empty();
+                phrase.val('');
                 phrase.focus();
                 phrase.unbind('blur');
+
+                // Reset the keyLog and the counter
+                keyLog = new Array();
                 return false;
             }
         }
@@ -142,11 +145,11 @@ function main() {
 
     // Bind the listeners only if there is a log in form
     var formType;
-    if( $("#formLogin") ) {
+    if( $("#formLogin").length ) {
         formType = SubmitType.LOGIN ;
-    } else if( $("#formCreate") ) {
+    } else if( $("#formCreate").length ) {
         formType = SubmitType.CREATE;
-    } else if( $("#formTrain") ) {
+    } else if( $("#formTrain").length ) {
         formType = SubmitType.TRAIN;
     }
     handleSubmission( formType );

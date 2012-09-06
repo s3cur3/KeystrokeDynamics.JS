@@ -15,12 +15,16 @@
 				// Set up our variables
 				$phrase = cleanse_sql_and_html( $_POST['inputKeyPhrase'] );
 				$i = intval(cleanse_sql_and_html( $_POST['iteration'] ));
+				$totalStepsInTraining = 15;
 				
 				// Store previous submission's data in the DB
 				insert_training_data_into_table( $phrase, $_POST['timingData'] );
 			?>
 			<section>
-				<h2>Create an Account (Step <?php echo $i; ?> of 15)</h2>
+				<h2>Create an Account</h2>
+				<div class="progress">
+					<div class="bar" style="width: <?php echo ($i/$totalStepsInTraining)*100; ?>%;">Step <?php echo $i; ?> of <?php echo $totalStepsInTraining ?></div>
+				</div>
 <?php
 					// If the key phrase is not set, the user has not yet chosen a key phrase
 					if( isset($_POST['inputKeyPhrase']) ) {
@@ -31,7 +35,7 @@
 							// Set up the form variables
 							$id = "inputKeyPhrase";
 							$submitTo = $_SERVER['PHP_SELF'];
-							if( $i >= 15 ) {
+							if( $i >= 14 ) {
 								$submitTo = "success.php";
 							}
 						?>
@@ -47,7 +51,7 @@
 							<input type="hidden" id="iteration" name="iteration" value="<?php echo intval($i + 1); ?>"/>
 							<div class="control-group">
 								<div class="controls">
-									<button type="submit" class="btn btn-primary">Finish training</button>
+									<button type="submit" class="btn btn-primary"><?php echo ($i < $totalStepsInTraining - 1 ? "Next" : "Finish training"); ?></button>
 								</div>
 							</div>
 						</form>
@@ -72,7 +76,7 @@
 					echo "\nTiming data: " . $_POST['timingData'];
 				?></pre>
 				</p>
-				<?php dump_training_data(); ?>
+				<?php //dump_training_data(); ?>
 			</section>
 		</div><!-- container -->
 		<?php include( 'components/footer.php' ); ?>

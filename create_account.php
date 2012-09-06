@@ -12,7 +12,11 @@
            ================================================== -->
             <?php include( 'components/page_header.php' ); ?>
 			<section>
-				<h2>Create an Account (Step 1 of 15)</h2>
+				<h2>Create an Account</h2>
+				<div class="progress">
+					<?php $totalStepsInTraining = 15; ?>
+					<div class="bar" style="width: <?php echo (1/$totalStepsInTraining)*100; ?>%;">Step 1 of <?php echo $totalStepsInTraining ?></div>
+				</div>
 					<p>Please choose a key phrase with which we can identify your account.</p>
 					<form class="form-horizontal" name="formCreate" id="formCreate" action="trainer.php" method="post">
 						<div class="control-group">
