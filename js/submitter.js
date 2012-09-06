@@ -1,6 +1,4 @@
-// JavaScript Document
-
-// Data structure (treated as a list) that will store a 
+// Data structure (treated as a list) that will store a
 // series of Keystrokes
 var keyLog = new Array();
 
@@ -58,46 +56,101 @@ function unMonitor( textBox ) {
 
 /**
  * Binds functions to various events on the page.
+ * @param idToMonitor The ID of the element to bind (should begin with a #)
  */
-function bind() {
+function bindKeystrokeListener( idToMonitor ) {
     // Clear the key phrase, so that if you reloaded
     // this page, it's not populated with the old data
-    $("#inputKeyPhrase").val('');
+    var textField = $(idToMonitor);
+    textField.val('');
 
-    $("#inputKeyPhrase").focus(monitor);
-    $("#inputKeyPhrase").blur(unMonitor);
+    textField.focus(monitor);
+    textField.blur(unMonitor);
 
+    var textFieldHelp = $(idToMonitor + "Help");
     // Pretty stuff
-    $("#keyPhraseHelp").fadeOut('slow');
-    $("#inputKeyPhrase").focus(function () {
-        $("#keyPhraseHelp").fadeIn();
+    textFieldHelp.fadeOut('slow');
+    textField.focus(function () {
+        textFieldHelp.fadeIn();
     });
-    $("#inputKeyPhrase").blur(function () {
-        $("#keyPhraseHelp").fadeOut();
+    textField.blur(function () {
+        textFieldHelp.fadeOut();
     });
+}
 
-    $("#formLogin").submit(function(event) {
-        // Write to diagnostic log
-        var theLog = $("#theLog");
-        theLog.empty();
-        theLog.append('<ul>');
-        for( var i = 0; i < keyLog.length; i++ ) {
-            theLog.append('<li>' + keyLog[i].toString() + '</li>');
+SubmitType = {
+    CREATE : formCreate,
+    LOGIN : formLogin,
+    TRAIN : formTrain
+}
+
+/**
+ * When the login form is submitted, this adds the data
+ * to the form that is necessary for analysis of
+ * keystroke dynamics
+ */
+function handleSubmission( submitType ) {
+    var form = $( "#" + submitType );
+
+    var timingData = $("#timingData");
+    var phrase = $("#inputKeyPhrase");
+
+    form.submit(function (event) {
+        if( submitType == SubmitType.LOGIN ) {
+            // Write to diagnostic log
+            var theLog = $("#theLog");
+            theLog.empty();
+            theLog.append('<ul>');
+            for (var i = 0; i < keyLog.length; i++) {
+                theLog.append('<li>' + keyLog[i].toString() + '</li>');
+            }
+            theLog.append('</ul>');
+        } else if( submitType == SubmitType.TRAIN ) {
+            // If the password was wrong, inform the user
+            if( phrase.val() != phrase.attr('placeholder') ) {
+                $("#inputKeyPhraseHelp").html("Sorry, you need to type your key phrase <strong>exactly as before.</strong>")
+                phrase.empty();
+                phrase.focus();
+                phrase.unbind('blur');
+                return false;
+            }
         }
-        theLog.append('</ul>');
 
         // Serialize the timing data
         var serializedKeyLog = "";
-        for( var i = 0; i < keyLog.length; i++ ) {
+        for (var i = 0; i < keyLog.length; i++) {
             serializedKeyLog += keyLog[i].serialize() + " ";
         }
 
         // Add the invisible field which will allow us to send timing data
-        /*$('#formLogin').append( '<input type="text" id="timingData" '
-                                + 'name="timingData" value="'
-                                + serializedKeyLog + '">' );*/
-        $("#timingData").val(serializedKeyLog);
+        timingData.val(serializedKeyLog);
         return true;
     });
 }
-$(document).ready(bind);
+
+function main() {
+    // Bind a listener to the key phrase input field
+    if( $("#inputKeyPhrase") ) {
+        bindKeystrokeListener( "#inputKeyPhrase" );
+    }
+
+    for( var i = 0; i < 10; i++ ) {
+        if( $("#inputKeyPhrase" + i) ) {
+            bindKeystrokeListener( "#inputKeyPhrase" + i );
+        }
+    }
+
+    // Bind the listeners only if there is a log in form
+    var formType;
+    if( $("#formLogin") ) {
+        formType = SubmitType.LOGIN ;
+    } else if( $("#formCreate") ) {
+        formType = SubmitType.CREATE;
+    } else if( $("#formTrain") ) {
+        formType = SubmitType.TRAIN;
+    }
+    handleSubmission( formType );
+
+    $("#inputKeyPhrase").focus();
+}
+$(document).ready(main);

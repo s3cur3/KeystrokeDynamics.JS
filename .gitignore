@@ -7,6 +7,8 @@
 # IntelliJ Idea project stuff
 *.iml
 
+phpMyAdmin/
+
 out/
 
 # Compiled source #
@@ -51,3 +53,7 @@ Thumbs.db
 _notes/
 */_notes/
 js/.jshintrc
+
+examples_from_the_literature/DSL-StrongPasswordData.txt
+
+examples_from_the_literature/out.txt

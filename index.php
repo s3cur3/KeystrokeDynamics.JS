@@ -9,10 +9,7 @@
         <div class="container">
             <!-- Masthead
            ================================================== -->
-            <header class="jumbotron subhead" id="overview">
-                <h1>KeystrokeDynamics.JS</h1>
-                <p class="lead">Nothing to see here yet.</p>
-            </header>
+            <?php include( 'components/page_header.php' ); ?>
 			
 			<section>
 				<h2>Log in</h2>
@@ -21,7 +18,7 @@
 						<label class="control-label" for="inputKeyPhrase">Key phrase:</label>
 						<div class="controls">
 							<input type="text" id="inputKeyPhrase" name="inputKeyPhrase" placeholder="Lorem ipsum">
-							<span class="help-inline" id="keyPhraseHelp">The phrase associated with your account.</span>
+							<span class="help-inline" id="inputKeyPhraseHelp">The phrase associated with your account.</span>
 						</div>
 					</div>
                     <input type="hidden" id="timingData" name="timingData" />
@@ -35,7 +32,14 @@
 			
 			<section>
 				<h2>Log</h2>
-				<p id="theLog"> </p>
+				<p id="theLog">
+					<pre><?php 
+						//exec("/usr/bin/Rscript examples_from_the_literature/evaluation-script_from_killourhy_and_maxion.R" . ' 2>&1', $out, $return_status);
+						include('out.txt' );
+						//print_r( $out );
+					?>
+					</pre>
+				</p>
 			</section>
 		</div><!-- container -->
 		<?php include( 'components/footer.php' ); ?>

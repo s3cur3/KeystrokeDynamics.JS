@@ -1,10 +1,9 @@
+<?php include( 'components/database_fns.php' ); ?>
 <!DOCTYPE HTML>
 <html>
 	<?php
 		$title = "Validation Page";
 		include( 'components/head.php' );
-		
-		include( 'components/sanitizer.php' );
 	?>
 	
 	<body data-spy="scroll" data-target=".subnav" data-offset="50">
@@ -13,13 +12,11 @@
         <div class="container">
             <!-- Masthead
            ================================================== -->
-            <header class="jumbotron subhead" id="overview">
-                <h1>Validation page</h1>
-                <p class="lead">You submitted a form!</p>
-            </header>
+            <?php include( 'components/page_header.php' ); ?>
 			
 			<section>
-				<h2>Here's the information we got.</h2>
+				<h2>Input Validation</h2>
+				<h3>Here's the information we got.</h3>
 				<?php
 					// Reconstruct the serialized data
 					if(isset($_POST['timingData'])) {

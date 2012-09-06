@@ -738,7 +738,6 @@ input,
 button,
 select,
 textarea {
-  font-size: 14px;
   font-weight: normal;
   line-height: 20px;
 }
@@ -5305,7 +5304,7 @@ select {
 }
 legend,
 label {
-  color: #999999;
+  color: #ccc;
   border-bottom: 0px solid #222;
 }
 input,

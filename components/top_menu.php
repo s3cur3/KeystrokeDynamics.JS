@@ -6,9 +6,12 @@
 				<span class="icon-bar"></span>
 				<span class="icon-bar"></span>
 			</button>
-			<a class="brand" href="/keystroke/index.php">Home</a>
+			<a class="brand" href="index.php">Home</a>
 			<div class="nav-collapse collapse">
 				<ul class="nav">
+					<li class="">
+						<a href="create_account.php">Create Account</a>
+					</li>
 					<li class="">
 						<a href="http://github.com/s3cur3/KeystrokeDynamics.JS" target="_blank">GitHub</a>
 					</li>

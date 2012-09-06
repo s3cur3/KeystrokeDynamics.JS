@@ -259,6 +259,7 @@ subjects <- sort( levels( X$subject ) );
 # and record the equal-error rates in a data frame.
 
 eers <- list();
+unlink("out.txt"); # delete the old output file
 for( detectorName in names( detectorSet ) ) {
 
   #######################
@@ -279,9 +280,14 @@ for( detectorName in names( detectorSet ) ) {
     cat("\r  ",i,"/",n,":",eer);
   }
   cat("\r  average equal-error:",mean(eers[[detectorName]]),"\n");
+  write("average equal-error:", file="out.txt", append=TRUE);
+  write(mean(eers[[detectorName]]), file="out.txt", append=TRUE);
 }
 
 #######################
+# Send all output to file out.txt
+sink(file = "out.txt", append = TRUE, type = c("output", "message"),
+     split = FALSE)
 cat("Tabulating results:\n");
 
 eers <- data.frame( eers );
