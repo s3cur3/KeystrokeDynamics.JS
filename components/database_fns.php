@@ -21,21 +21,13 @@ function create_db() {
 
 /**
  * Creates the following tables used by the machine learning tools:
- *   mysql> describe training;
- *   +--------------+---------------+------+-----+---------+-------+
- *   | Field        | Type          | Null | Key | Default | Extra |
- *   +--------------+---------------+------+-----+---------+-------+
- *   | key_phrase   | varchar(200)  | YES  |     | NULL    |       |
- *   | timing_array | varchar(5000) | YES  |     | NULL    |       |
- *   +--------------+---------------+------+-----+---------+-------+
- *  
- *   mysql> describe training_out;
- *   +------------+---------------+------+-----+---------+-------+
- *   | Field      | Type          | Null | Key | Default | Extra |
- *   +------------+---------------+------+-----+---------+-------+
- *   | key_phrase | varchar(200)  | YES  |     | NULL    |       |
- *   | output     | varchar(5000) | YES  |     | NULL    |       |
- *   +------------+---------------+------+-----+---------+-------+
+ *   CREATE TABLE IF NOT EXISTS `training` (
+ *	  `id` int(11) NOT NULL,
+ *	  `key_phrase` varchar(100) NOT NULL,
+ *	  `timing_array` varchar(5000) NOT NULL,
+ *	  PRIMARY KEY (`id`),
+ *	  UNIQUE KEY `id` (`id`)
+ *	);
  */
 function create_tables() {
 	global $db_hostname, $db_username, $db_password, $db_database, $table_training_data, $table_training_output;
@@ -71,10 +63,10 @@ function insert_training_data_into_table( $key_phrase, $timing_data ) {
 	
 	
 	// Prevent SQL injection by using a placeholder query
-	$placeholder_query = 'PREPARE insertion FROM "INSERT INTO '. $table_training_data . ' VALUES(?,?);"';
+	$placeholder_query = 'PREPARE insertion FROM "INSERT INTO '. $table_training_data . ' VALUES(?,?,?);"';
 	mysql_query( $placeholder_query );
 	
-	$set_query = 'SET @key_phrase = "' . $key_phrase . '", @timing_array = "' . $timing_data . '";';
+	$set_query = 'SET @id = null, @key_phrase = "' . $key_phrase . '", @timing_array = "' . $timing_data . '";';
 	mysql_query( $set_query );
 
 	$execute_query = 'EXECUTE insertion USING @key_phrase, @timing_array;';
@@ -118,7 +110,8 @@ function cleanse_sql_and_html( $string ) {
 }
 
 /**
- *
+ * Gets all arrays of timing data (stored in the "training" table 
+ * in the database) for a given key phrase.
  * @param $key_phrase The key phrase for which we should 
  *                    retrieve all known training data.
  * @return An array of timing data (one element per training instance 
@@ -147,10 +140,23 @@ function getTrainingData( $key_phrase ) {
 	$deallocate_query = 'DEALLOCATE PREPARE selection;';
 	mysql_query( $deallocate_query );	
 	
+	
+	// The result we got was just a resource handle on the SQL Server
+	// Have to construct an array for the results
+	$data = array();
+	while ($r = mysql_fetch_array($result)) {
+		// This magically sets $xyz to the value of the column named
+		// xyz in the current query.
+		extract($r);
+		
+		// push the value from the column "timing_array" to the end of the list
+		$data[] = $timing_array;
+	}
+	
 	// Close the connection to the MySQL server
 	mysql_close( $db_server );
 	
-	$query = 'SELECT * FROM `training` WHERE `key_phrase` = "abcdefg"';
+	return $data;
 }
 
 /**

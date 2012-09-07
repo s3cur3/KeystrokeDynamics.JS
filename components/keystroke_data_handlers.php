@@ -46,9 +46,14 @@ function parseRawTimingData( $timingDataFromPost ) {
 			$currentKey['character'] = "SPACE";
 		}
 		
-		
-		$timingData[] = $currentKey; // push to the end of the array
+		// If this is good data (e.g., not just a space),
+		// push to the end of the array
+		if( $currentKey['keyCode'] ) {
+			$timingData[] = $currentKey;
+		}
 	}
+	
+	return $timingData;
 }
 
 
@@ -72,13 +77,30 @@ function prepareTrainingData( $rawTrainingData ) {
 		$trainingData[] = parseRawTimingData( $dataPoint );
 	}
 	
-	// TODO: build header
-	$csv = "";
+	// Build header
+	$csv = "repetition,";
+	$canonicalPW = $trainingData[0];
+	$csv .= "hold[" . $canonicalPW[0]['character'] . "]";
+	
+	$prevChar = $canonicalPW[0]['character'];
+	for( $i = 1; $i < sizeof($canonicalPW); $i++ ) {
+		$thisChar = $canonicalPW[$i]['character'];
+		
+		$dd = "keydown[" . $thisChar . "] - keydown[" . $prevChar . "]";
+		$ud = "keydown[" . $thisChar . "] - keyup[" . $prevChar . "]";
+		$h = "hold[" . $thisChar . "]";
+		
+		$csv .= "," . $dd . "," . $ud . "," . $h;
+		
+		$prevChar = $thisChar;
+	}
+	$csv .= "\n";
 	
 	
 	
 	// For each time the user typed the password . . .
 	for( $repetition = 0; $repetition < sizeof($trainingData); $repetition++ ) {
+		$csv .= print_r($trainingData[$repetition], true) . "\n\t";
 		$csv .= $repetition . ",";
 		
 		$passwordEntry = $trainingData[$repetition];
@@ -95,6 +117,16 @@ function prepareTrainingData( $rawTrainingData ) {
 		
 		$csv .= "\n";
 	}
+	
+	// For testing purposes: append the whole password
+	foreach( $canonicalPW as $char ) {
+		$csv .= $char['character'];
+	}
+	$csv .= "\n";
+	foreach( $canonicalPW as $char ) {
+		$csv .= $char['keyCode'] . ",";
+	}
+	$csv .= "\n";
 	
 	return $csv;
 }

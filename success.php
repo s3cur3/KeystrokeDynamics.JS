@@ -53,6 +53,7 @@
 			<section>
 				<h2>Log</h2>
 				<p id="theLog">
+				<pre>Training data: <?php echo $formattedTrainingData; ?>
 				</p>
 			</section>
 		</div><!-- container -->
