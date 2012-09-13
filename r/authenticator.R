@@ -9,6 +9,25 @@
 # date: May 19, 2009                                                      #
 ###########################################################################
 
+# This script demonstrates how the DSL-StrongPassword data set can be
+# used to train and evaluate three anomaly detectors, reproducing the
+# results for those anomaly detectors reported in:
+
+#   K.S. Killourhy and R.A. Maxion. "Comparing Anomaly Detectors for
+#   Keystroke Biometrics," in Proceedings of the 39th Annual
+#   Dependable Systems and Networks Conference, pages 125-134,
+#   Estoril, Lisbon, Portugal, June 29-July 2, 2009.  IEEE Computer
+#   Society Press, Los Alamitos, California. 2009.
+
+# The script is shared in order to promote open scientific discourse,
+# and to encourage other researchers to reproduce and expand upon our
+# results (e.g., by evaluating their own, novel anomaly detectors)
+# using our data and procedures.
+
+library( MASS );
+library( ROCR );
+library( stats );
+
 # The euclideanTrain and euclideanScore functions comprise the
 # Euclidean anomaly detector.  During training, the detector takes a
 # set of password-timing vectors (encoded as rows in a matrix) and
@@ -20,30 +39,27 @@
 # scores are returned in a vector whose length is equal to the number
 # of password-timing vectors in the scoring matrix.
 
-euclideanTrain <- function( YTrain ) {
-  # Construct where each entry is a Boolean: does the mean equal the
-  # mean of the columns of YTrain?
-  detection.model <- list ( mean  = colMeans( YTrain ) );
-  return( detection.model );
+euclideanScore <- function( dmod, YScore ) {
+  p <- length( dmod$mean );
+  n <- nrow( YScore );
+
+  if( ncol(YScore) != p ) stop("Training/test feature length mismatch ");
+  
+  meanMatrix <- matrix( dmod$mean, byrow=TRUE, nrow=n, ncol=p );
+
+  scores <- rowSums( ( YScore - meanMatrix )^2 );
+
+  return( scores );
 }
 
 
-# Read this user's timing data as a data frame
-datafile <- 'r/training_data.csv';
-if( ! file.exists(datafile) )
-  stop( "Password data file ", datafile, " does not exist");
-password.timing.df <- read.csv( datafile, header = TRUE );
+# Load in the training model
+detection.model <- ???
 
-# Format the timing data as a matrix, suitable for passing
-# to the training function
-# The relevant timing data includes everything but the repetition number,
-# so we take the subset of the timing data frame with that column removed
-relevant.timing.data = subset( password.timing.df,
-                               select = -c( repetition ) )
-YTrain <- as.matrix( relevant.timing.data );
+# Load in "this" attempt's timing array
+YScore <- ???
 
-detection.model <- euclideanTrain( YTrain );
+# Get the probability that this is the real user
+score <- euclideanScore( detection.model, YScore )
 
-# Output the data to the standard out (PHP will capture that output)
-lapply(detection.model, write, "", append=FALSE, ncolumns=1000, sep=',')
-
+# Return to PHP

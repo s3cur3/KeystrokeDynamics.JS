@@ -10,7 +10,7 @@
         <div class="container">
             <!-- Masthead
            ================================================== -->
-            <?php include( 'components/page_header.php' ); ?>
+            <?php include( 'components/branding.php' ); ?>
 			<section>
 				<h2>Create an Account</h2>
 				<div class="progress">

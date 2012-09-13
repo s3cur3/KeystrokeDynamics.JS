@@ -9,7 +9,7 @@
         <div class="container">
             <!-- Masthead
            ================================================== -->
-            <?php include( 'components/page_header.php' ); ?>
+            <?php include( 'components/branding.php' ); ?>
 			
 			<section>
 				<h2>Log in</h2>

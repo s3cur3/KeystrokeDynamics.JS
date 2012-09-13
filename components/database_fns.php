@@ -7,6 +7,36 @@ $db_database = "keystroke_data";
 $table_training_data = "training";
 $table_training_output = "training_out";
 
+/**
+ * Sanitizes a string, removing both HTML and
+ * SQL special characters. 
+ * @param $string The string to sanitize
+ * @requires Global variables $db_hostname, $db_username, $db_password, $db_database for mysql_connect
+ * @return A sanitized version of the string, safe for both
+ *         SQL queries and display in HTML
+ */
+function cleanse_sql_and_html( $string ) {
+	// If PHP "helpfully" added backslashes to escape quotes, remove them
+	if ( get_magic_quotes_gpc() )
+		$string = stripslashes( $string );
+	
+	global $db_hostname, $db_username, $db_password, $db_database;
+	// Connect to the database
+	if( isset( $db_hostname ) && isset( $db_username ) 
+		&& isset( $db_password ) && isset( $db_database ) ) {
+		$db_server = mysql_connect( $db_hostname, $db_username, $db_password );
+		
+		// Strip MySQL entities
+		$string = mysql_real_escape_string( $string );
+		
+		// Close the connection to the MySQL server
+		mysql_close( $db_server );
+	}
+	
+	// Strip html entities
+    return htmlentities( $string );
+}
+
 function create_db() {
 	global $db_hostname, $db_username, $db_password, $db_database;
 	
@@ -22,12 +52,13 @@ function create_db() {
 /**
  * Creates the following tables used by the machine learning tools:
  *   CREATE TABLE IF NOT EXISTS `training` (
- *	  `id` int(11) NOT NULL,
- *	  `key_phrase` varchar(100) NOT NULL,
- *	  `timing_array` varchar(5000) NOT NULL,
- *	  PRIMARY KEY (`id`),
- *	  UNIQUE KEY `id` (`id`)
- *	);
+ *		  `id` int(11) NOT NULL AUTO_INCREMENT,
+ *		  `key_phrase` varchar(100) NOT NULL,
+ *		  `timing_array` varchar(5000) NOT NULL,
+ *		  PRIMARY KEY (`id`),
+ *		  UNIQUE KEY `id` (`id`)
+ *	) ENGINE=MyISAM  DEFAULT CHARSET=latin1 AUTO_INCREMENT=2 ;
+ * @TODO: fix this!
  */
 function create_tables() {
 	global $db_hostname, $db_username, $db_password, $db_database, $table_training_data, $table_training_output;
@@ -69,7 +100,7 @@ function insert_training_data_into_table( $key_phrase, $timing_data ) {
 	$set_query = 'SET @id = null, @key_phrase = "' . $key_phrase . '", @timing_array = "' . $timing_data . '";';
 	mysql_query( $set_query );
 
-	$execute_query = 'EXECUTE insertion USING @key_phrase, @timing_array;';
+	$execute_query = 'EXECUTE insertion USING @id, @key_phrase, @timing_array;';
 	mysql_query( $execute_query );
 	
 	$deallocate_query = 'DEALLOCATE PREPARE insertion;';
@@ -77,36 +108,6 @@ function insert_training_data_into_table( $key_phrase, $timing_data ) {
 	
 	// Close the connection to the MySQL server
 	mysql_close( $db_server );
-}
-
-/**
- * Sanitizes a string, removing both HTML and
- * SQL special characters. 
- * @param $string The string to sanitize
- * @requires Global variables $db_hostname, $db_username, $db_password, $db_database for mysql_connect
- * @return A sanitized version of the string, safe for both
- *         SQL queries and display in HTML
- */
-function cleanse_sql_and_html( $string ) {
-	// If PHP "helpfully" added backslashes to escape quotes, remove them
-	if ( get_magic_quotes_gpc() )
-		$string = stripslashes( $string );
-	
-	global $db_hostname, $db_username, $db_password, $db_database;
-	// Connect to the database
-	if( isset( $db_hostname ) && isset( $db_username ) 
-		&& isset( $db_password ) && isset( $db_database ) ) {
-		$db_server = mysql_connect( $db_hostname, $db_username, $db_password );
-		
-		// Strip MySQL entities
-		$string = mysql_real_escape_string( $string );
-		
-		// Close the connection to the MySQL server
-		mysql_close( $db_server );
-	}
-	
-	// Strip html entities
-    return htmlentities( $string );
 }
 
 /**
@@ -194,6 +195,79 @@ function dump_training_data() {
 	
 	// Close the connection to the MySQL server
 	mysql_close( $db_server );
+}
+
+/**
+ * During the training phase for a user, this is used to add training data
+ * @param $key_phrase
+ * @param $output The output training model
+ */
+function store_detection_model( $key_phrase, $output ) {
+	global $db_hostname, $db_username, $db_password, $db_database, $table_training_data, $table_training_output;
+	
+	$db_server = mysql_connect( $db_hostname, $db_username, $db_password );
+	if ( !$db_server ) die( "<p>Unable to connect to MySQL: " . mysql_error() . '</p>' );
+	
+	// Select the keystroke database
+	mysql_select_db( $db_database ) or die( "Unable to select database: " . mysql_error() );
+	
+	
+	// Prevent SQL injection by using a placeholder query
+	$placeholder_query = 'PREPARE insertion FROM "INSERT INTO '. $table_training_output . ' VALUES(?,?);"';
+	mysql_query( $placeholder_query );
+	
+	$set_query = 'SET @key_phrase = "' . $key_phrase . '", @output = "' . $output . '";';
+	mysql_query( $set_query );
+
+	$execute_query = 'EXECUTE insertion USING @key_phrase, @output;';
+	mysql_query( $execute_query );
+	
+	$deallocate_query = 'DEALLOCATE PREPARE insertion;';
+	mysql_query( $deallocate_query );	
+	
+	// Close the connection to the MySQL server
+	mysql_close( $db_server );
+}
+
+/**
+ * Gets the detection model generated by trainer.R.
+ * @param $key_phrase The key phrase for which we should 
+ *                    retrieve the detection model.
+ * @return the comma-separated-value detection model
+ * @TODO: Make a note on how you use this in R (how do you read it in?)
+ */
+function getDetectionModel( $key_phrase ) {
+	global $db_hostname, $db_username, $db_password, $db_database, $table_training_data, $table_training_output;
+	
+	$db_server = mysql_connect( $db_hostname, $db_username, $db_password );
+	if ( !$db_server ) die( "<p>Unable to connect to MySQL: " . mysql_error() . '</p>' );
+	
+	// Select the keystroke database
+	mysql_select_db( $db_database ) or die( "Unable to select database: " . mysql_error() );
+	
+	
+	// Prevent SQL injection by using a placeholder query
+	$placeholder_query = 'PREPARE selection FROM "SELECT * from `'. $table_training_output . '` WHERE `key_phrase` = ?;"';
+	mysql_query( $placeholder_query );
+	
+	$set_query = 'SET @key_phrase = "' . $key_phrase . '";';
+	mysql_query( $set_query );
+
+	$execute_query = 'EXECUTE selection USING @key_phrase;';
+	$result = mysql_query( $execute_query ) or die( "<p>Error querying the database.</p>");
+	
+	$deallocate_query = 'DEALLOCATE PREPARE selection;';
+	mysql_query( $deallocate_query );	
+	
+	
+	// The result we got was just a resource handle on the SQL Server
+	// Have to construct an array for the results
+	$r = mysql_fetch_array($result);
+	// This magically sets $xyz to the value of the column named
+	// xyz in the current query.
+	extract($r);
+	
+	return $output; // the value from the column "output" in the SQL query
 }
 
 ?>

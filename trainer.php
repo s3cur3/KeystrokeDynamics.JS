@@ -10,7 +10,7 @@
         <div class="container">
             <!-- Masthead
            ================================================== -->
-            <?php include( 'components/page_header.php' ); ?>
+            <?php include( 'components/branding.php' ); ?>
 			<?php
 				// Set up our variables
 				$phrase = cleanse_sql_and_html( $_POST['inputKeyPhrase'] );

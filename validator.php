@@ -13,7 +13,7 @@
         <div class="container">
             <!-- Masthead
            ================================================== -->
-            <?php include( 'components/page_header.php' ); ?>
+            <?php include( 'components/branding.php' ); ?>
 			
 			<section>
 				<h2>Input Validation</h2>
@@ -26,9 +26,6 @@
 						echo "<p>Great! You sent timing data!</p>";
 						echo "<p>The phrase you entered was <code>" 
 							. $phrase . "</code></p>";
-						
-						
-						
 						
 						// Split the POSTed data on spaces (to get individual keystrokes)
 						$timingData = parseRawTimingData( $_POST['timingData'] );
@@ -56,6 +53,18 @@
 						?>
 					</table>
 				<?php
+						$detectionModelCSV = getCSVHeader( $phrase );
+						$detectionModelCSV .= getDetectionModel( $phrase );
+						
+						// Write the detection model to disk
+						chmod( 'r', 0777 );
+						touch( 'r/dmod.csv' );
+						chmod( 'r/dmod.csv', 0777 );
+						$fileHandle = fopen( 'r/dmod.csv', 'w' ) or die("<p>Error! Can't save the training data!</p>");
+						fwrite( $fileHandle, $detectionModelCSV ) or die("<p>Error! Failed to write the training data!</p>");
+					
+						echo "<pre>Detection model: " . getDetectionModel($phrase) 	 . "</pre>";
+				
 					} else {
 						echo "<p>No timing data...</p>";
 					}

@@ -4,7 +4,6 @@
 	
 	<meta charset="utf-8">
 	<meta name="viewport" content="width=device-width, initial-scale=1.0">
-	<meta name="description" content="A tool for determining the best laptop for your needs">
 	<meta name="author" content="Tyler A. Young">
 
 	<link href="css/bootstrap.css" rel="stylesheet">

@@ -22,7 +22,7 @@
  *                       character)
  */
 function parseRawTimingData( $timingDataFromPost ) {
-	$rawTimingData = explode( " ", $_POST['timingData'] );
+	$rawTimingData = explode( " ", $timingDataFromPost );
 	$timingData = array();
 	foreach( $rawTimingData as $keystroke ) {
 		// The Javascript sends the data as:
@@ -30,25 +30,25 @@ function parseRawTimingData( $timingDataFromPost ) {
 		// (With each keypress triplet separated by a space)
 		$keyCode_Down_Up = explode( ",", $keystroke );
 		
-		$currentKey['keyCode'] = $keyCode_Down_Up[0];
-		$currentKey['timeDown'] = $keyCode_Down_Up[1];
-		$currentKey['timeUp'] = $keyCode_Down_Up[2];
-		
-		$currentKey['timeHeld'] = $currentKey['timeUp'] - $currentKey['timeDown'];
-		$currentKey['character'] = chr($currentKey['keyCode']);
-		
-		// Make non-printing characters readable
-		if( $currentKey['keyCode'] == 16 ) {
-			$currentKey['character'] = "SHIFT";
-		} else if( $currentKey['keyCode'] == 13 ) {
-			$currentKey['character'] = "ENTER";
-		} else if( $currentKey['keyCode'] == 32 ) {
-			$currentKey['character'] = "SPACE";
-		}
-		
-		// If this is good data (e.g., not just a space),
-		// push to the end of the array
-		if( $currentKey['keyCode'] ) {
+		// If this is good data (e.g., not just a space)
+		if( isset($keyCode_Down_Up[1]) ) {
+			$currentKey['keyCode'] = $keyCode_Down_Up[0];
+			$currentKey['timeDown'] = $keyCode_Down_Up[1];
+			$currentKey['timeUp'] = $keyCode_Down_Up[2];
+			
+			$currentKey['timeHeld'] = $currentKey['timeUp'] - $currentKey['timeDown'];
+			$currentKey['character'] = chr($currentKey['keyCode']);
+			
+			// Make non-printing characters readable
+			if( $currentKey['keyCode'] == 16 ) {
+				$currentKey['character'] = "SHIFT";
+			} else if( $currentKey['keyCode'] == 13 ) {
+				$currentKey['character'] = "ENTER";
+			} else if( $currentKey['keyCode'] == 32 ) {
+				$currentKey['character'] = "SPACE";
+			}
+			
+			// push to the end of the array
 			$timingData[] = $currentKey;
 		}
 	}
@@ -56,6 +56,35 @@ function parseRawTimingData( $timingDataFromPost ) {
 	return $timingData;
 }
 
+/**
+ * Constructs a header for the CSV file corresponding the key phrase.
+ *
+ * @param $keyPhrase The key phrase whose CSV file you want the header for
+ * @return A string, terminated with a \n (newline), to be used as the CSV's
+ *         header.
+ * @TODO: Refactor this
+ */
+function getCSVHeader( $keyPhrase ) {
+	$header = "";
+	$header .= "repetition,";
+	$header .= "hold[" . $keyPhrase['character'] . "]";
+	
+	$prevChar = $keyPhrase['character'];
+	for( $i = 1; $i < sizeof($keyPhrase); $i++ ) {
+		$thisChar = $keyPhrase[$i]['character'];
+		
+		$dd = "keydown[" . $thisChar . "] - keydown[" . $prevChar . "]";
+		$ud = "keydown[" . $thisChar . "] - keyup[" . $prevChar . "]";
+		$h = "hold[" . $thisChar . "]";
+		
+		$header .= "," . $dd . "," . $ud . "," . $h;
+		
+		$prevChar = $thisChar;
+	}
+	$header .= "\n";
+	
+	return $header;
+}
 
 /**
  * Formats the training data for use with our R script.
@@ -69,7 +98,9 @@ function parseRawTimingData( $timingDataFromPost ) {
  *         so, you'll have a CSV file with the following columns:
  *           repetition, hold[0], keydown[1] - keydown[0], keydown[1] - keyup[0], hold[1], . . . , keydown[n] - keydown[n-1], keydown[n] - keyup[n-1], hold[n], keydown[Return] - keydown[n], keydown[Return] - keyup[n], hold[Return] 
  */
-function prepareTrainingData( $rawTrainingData ) {				
+function prepareTrainingData( $rawTrainingData ) {
+	$print_diagnostic = FALSE;
+				
 	// Parse the raw data
 	$trainingData = array();
 	foreach( $rawTrainingData as $dataPoint ) {
@@ -78,29 +109,17 @@ function prepareTrainingData( $rawTrainingData ) {
 	}
 	
 	// Build header
-	$csv = "repetition,";
-	$canonicalPW = $trainingData[0];
-	$csv .= "hold[" . $canonicalPW[0]['character'] . "]";
-	
-	$prevChar = $canonicalPW[0]['character'];
-	for( $i = 1; $i < sizeof($canonicalPW); $i++ ) {
-		$thisChar = $canonicalPW[$i]['character'];
-		
-		$dd = "keydown[" . $thisChar . "] - keydown[" . $prevChar . "]";
-		$ud = "keydown[" . $thisChar . "] - keyup[" . $prevChar . "]";
-		$h = "hold[" . $thisChar . "]";
-		
-		$csv .= "," . $dd . "," . $ud . "," . $h;
-		
-		$prevChar = $thisChar;
+	$csv = "";
+	if( $print_diagnostic ) {
+		$csv = "\nRaw training data: " . print_r($rawTrainingData, true) . "\n";
 	}
-	$csv .= "\n";
+	$csv .= getCSVHeader( $trainingData[0] /* the key phrase */ );
 	
 	
 	
 	// For each time the user typed the password . . .
 	for( $repetition = 0; $repetition < sizeof($trainingData); $repetition++ ) {
-		$csv .= print_r($trainingData[$repetition], true) . "\n\t";
+		//$csv .= print_r($trainingData[$repetition], true) . "\n\t";
 		$csv .= $repetition . ",";
 		
 		$passwordEntry = $trainingData[$repetition];
@@ -119,14 +138,16 @@ function prepareTrainingData( $rawTrainingData ) {
 	}
 	
 	// For testing purposes: append the whole password
-	foreach( $canonicalPW as $char ) {
-		$csv .= $char['character'];
+	if( $print_diagnostic ) {
+		foreach( $canonicalPW as $char ) {
+			$csv .= $char['character'];
+		}
+		$csv .= "\n";
+		foreach( $canonicalPW as $char ) {
+			$csv .= $char['keyCode'] . ",";
+		}
+		$csv .= "\n";
 	}
-	$csv .= "\n";
-	foreach( $canonicalPW as $char ) {
-		$csv .= $char['keyCode'] . ",";
-	}
-	$csv .= "\n";
 	
 	return $csv;
 }

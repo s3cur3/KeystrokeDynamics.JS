@@ -52,6 +52,7 @@ library( stats );
 # of password-timing vectors in the scoring matrix.
 
 euclideanTrain <- function( YTrain ) {
+  # dmod --> "Detection model"
   dmod <- list ( mean  = colMeans( YTrain ) );
   return( dmod );
 }
@@ -207,8 +208,14 @@ evaluateSubject <- function( X, evalSubject, detectorTrain, detectorScore ) {
   # repetitions from all the other subjects.
 
   YTrain <- as.matrix( subset( X,
+                              # subset: logical expression indicating
+                              # elements or rows to keep: missing values
+                              # are taken as false.
                               subset = ( subject == evalSubject &
                                         sessionIndex <= 4 ),
+                              # select: expression, indicating columns
+                              # to select from a data frame.
+                              #   exclude subj., session num, and rep cols
                               select = -c( subject, sessionIndex, rep ) ) );
 
   YScore0 <- as.matrix( subset( X,

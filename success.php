@@ -11,7 +11,7 @@
         <div class="container">
             <!-- Masthead
            ================================================== -->
-            <?php include( 'components/page_header.php' ); ?>
+            <?php include( 'components/branding.php' ); ?>
 			<?php
 				// Set up our variables
 				$phrase = cleanse_sql_and_html( $_POST['inputKeyPhrase'] );
@@ -37,15 +37,20 @@
 					$formattedTrainingData = prepareTrainingData( $rawTrainingData );
 					
 					// Write the training data to a CSV file for the R script
-					// TODO: Confirm this is right.
-					$f = file( 'r/training_data.csv' );
-					fwrite( $f, $formattedTrainingData );
+					chmod( 'r', 0777 );
+					touch( 'r/training_data.csv' );
+					chmod( 'r/training_data.csv', 0777 );
+					$fileHandle = fopen( 'r/training_data.csv', 'w' ) or die("<p>Error! Can't save the training data!</p>");
+					fwrite( $fileHandle, $formattedTrainingData ) or die("<p>Error! Failed to write the training data!</p>");
 					
 					
-					// Call the R script
-					// TODO: Oh yeah, make this work.
+					// Call the R script for training
 					exec("/usr/bin/Rscript r/trainer.R" . ' 2>&1', $out, $return_status);
-				
+					$csvForModelNoLabels = $out[0];
+					echo( "<pre>Detection model: " . $csvForModelNoLabels . "</pre>" );
+					
+					// Store the output from the script (a vector with the trained classification)
+					store_detection_model( $phrase, $csvForModelNoLabels );
 				?>
 				<p>Successfully created your account using key phrase <strong><?php echo $phrase;?></strong>.</p>
 			</section>
