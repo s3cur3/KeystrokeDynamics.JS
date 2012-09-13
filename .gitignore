@@ -57,3 +57,5 @@ js/.jshintrc
 examples_from_the_literature/DSL-StrongPasswordData.txt
 
 examples_from_the_literature/out.txt
+
+r/authenticator_old.R

@@ -37,11 +37,7 @@
 					$formattedTrainingData = prepareTrainingData( $rawTrainingData );
 					
 					// Write the training data to a CSV file for the R script
-					chmod( 'r', 0777 );
-					touch( 'r/training_data.csv' );
-					chmod( 'r/training_data.csv', 0777 );
-					$fileHandle = fopen( 'r/training_data.csv', 'w' ) or die("<p>Error! Can't save the training data!</p>");
-					fwrite( $fileHandle, $formattedTrainingData ) or die("<p>Error! Failed to write the training data!</p>");
+					writeStringToFileForR( $formattedTrainingData, "training_data.csv" );
 					
 					
 					// Call the R script for training

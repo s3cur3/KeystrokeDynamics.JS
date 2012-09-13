@@ -1,4 +1,5 @@
 <?php
+
 global $db_hostname, $db_username, $db_password, $db_database;
 $db_hostname = "localhost";
 $db_username = "root";

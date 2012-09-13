@@ -1,3 +1,7 @@
+footer {
+	margin: 1.5em;
+}
+
 strong, b {
 	color: #33B5E5
 }
@@ -49,6 +53,10 @@ strong, b {
 .btn.selected:active,
 .btn.selected.active {
     background-color: #24748c \9;
+}
+
+.alert-info {
+	color: #fff;
 }
 
 @media only screen and (min-width: 980px) {

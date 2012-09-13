@@ -1,5 +1,35 @@
 <?php
 
+include_once( 'database_fns.php' );
+
+/**
+ * Writes the specified string to the file. This file will go in
+ * the r/ directory. If no extension is specified, we will append
+ * ".csv" to your specified name.
+ * @param $string The string to write to the file
+ * @param $fileName The name of the file to which we should write.
+ * @param $append True if we should append to the file if it exists,
+ *                false if we should overwrite it instead
+ */
+function writeStringToFileForR( $string, $fileName, $append=false ) {
+	chmod( 'r', 0777 );
+	touch( 'r/dmod.csv' );
+	chmod( 'r/dmod.csv', 0777 );
+	
+	$mode = 'w';
+	if( $append ) {
+		$mode = 'a';
+	}
+	
+	if( !strpos($fileName, ".") ) {
+		// No extension; append ".csv"
+		$fileName .= ".csv";
+	}
+	
+	$fileHandle = fopen( "r/" . $fileName, $mode ) or die("<p>Error! Can't open the file!</p>");
+	fwrite( $fileHandle, $string ) or die("<p>Error! Failed to write the file!</p>");
+}
+
 /**
  * Parses the timing data that we get from our HTML + JS form
  * (in the format 
@@ -37,6 +67,10 @@ function parseRawTimingData( $timingDataFromPost ) {
 			$currentKey['timeUp'] = $keyCode_Down_Up[2];
 			
 			$currentKey['timeHeld'] = $currentKey['timeUp'] - $currentKey['timeDown'];
+			if( $currentKey['timeHeld'] < 0 ) {
+				$currentKey['timeHeld'] = 0;
+			}
+			
 			$currentKey['character'] = chr($currentKey['keyCode']);
 			
 			// Make non-printing characters readable
@@ -105,6 +139,43 @@ function getCSVHeader( $timingData, $hasRepetitionColumn=true ) {
 }
 
 /**
+ * Constructs a single line in a timing data CSV file (e.g., as is used
+ * to store the training data or during authentication) from a PHP-formatted
+ * timing data array (as returned by the parseRawTimingData() function).
+ * @param $timingData Timing information on a single entry of the user's 
+ *                    password, formatted by the parseRawTimingData() function.
+ * @param $repetition The repetition that this entry represents. If this is
+ *                    a single repetition (as is used when authenticating
+ *                    an already-existing user), pass in a negative value
+ *                    here to omit the repetition column entirely.
+ * @return A string containing comma-separated values, as is used in our
+ *         CSV files on timing data. This is terminated by a newline ("\n").
+ */
+function getCSVLineFromTimingData( $timingData, $repetition = -1 ) {
+	$csv = "";
+	if( $repetition >= 0 ) {
+		$csv .= $repetition . ",";
+	}
+	
+	$csv .= $timingData[0]['timeHeld']; // only care about time held for pos. 0
+	
+	// For each (other) character in the password . . .
+	for( $i = 1; $i < sizeof($timingData); $i++ ) {
+		$dd = $timingData[$i]['timeDown'] - $timingData[$i-1]['timeDown'];
+		$ud = $timingData[$i]['timeDown'] - $timingData[$i-1]['timeUp'];
+		$h = $timingData[$i]['timeHeld'];
+		
+		if( $h < 0 ) 	$h = 0;
+		
+		$csv .= "," . $dd . "," . $ud . "," . $h;
+	}
+	
+	$csv .= "\n";
+	
+	return $csv;
+}
+
+/**
  * Formats the training data for use with our R script.
  * 
  * @param $rawTrainingData An array with all the (raw) data we have
@@ -133,26 +204,9 @@ function prepareTrainingData( $rawTrainingData ) {
 	}
 	$csv .= getCSVHeader( $trainingData[0] /* timing data on a single password entry */ );
 	
-	
-	
 	// For each time the user typed the password . . .
 	for( $repetition = 0; $repetition < sizeof($trainingData); $repetition++ ) {
-		//$csv .= print_r($trainingData[$repetition], true) . "\n\t";
-		$csv .= $repetition . ",";
-		
-		$passwordEntry = $trainingData[$repetition];
-		$csv .= $passwordEntry[0]['timeHeld']; // only care about time held for pos. 0
-		
-		// For each (other) character in the password . . .
-		for( $i = 1; $i < sizeof($passwordEntry); $i++ ) {
-			$dd = $passwordEntry[$i]['timeDown'] - $passwordEntry[$i-1]['timeDown'];
-			$ud = $passwordEntry[$i]['timeDown'] - $passwordEntry[$i-1]['timeUp'];
-			$h = $passwordEntry[$i]['timeHeld'];
-			
-			$csv .= "," . $dd . "," . $ud . "," . $h;
-		}
-		
-		$csv .= "\n";
+		$csv .= getCSVLineFromTimingData( $trainingData[$repetition], $repetition );
 	}
 	
 	// For testing purposes: append the whole password
