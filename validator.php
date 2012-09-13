@@ -49,17 +49,23 @@
 						$score = floatval(end($out));
 						
 						// Evaluate whether you're an impersonator or not
-						echo "<p>Likelihood that you are a haxx0r: $score</p>";
-						$msgClass = "alert";
-						$specialMsgText = "We're not sure what to think of you. We'll let you pass, though.";
+						$msgClass = "btn";
+						$decision = "You're probably not an impersonator.";
+						$explanation = "We're not really sure what to think of you. We'll let you pass, though.";
 						if( $score > 0.5 ) {
-							$msgClass .= " alert-error";
-							$specialMsgText = "You are probably an imposter.";
+							$msgClass .= " btn-danger";
+							$decision = "You're an impersonator.";
+							$explanation = "The chances are very low that you are who you say you are.";
 						} else if( $score < 0.3 ) {
-							$msgClass .= " alert-success";
-							$specialMsgText = "You are probably not an impersonator.";
+							$msgClass .= " btn-success";
+							$decision = "You're definitely not an impersonator.";
+							$explanation = "The chances are very good that you are who you say you are.";
 						}
-						echo "<p><span class=\"$msgClass\">$specialMsgText</span></p>";
+?>					
+						<p>Likelihood that you are a haxx0r:
+							<button  rel="popover" id="theScore" class="<?php echo $msgClass; ?>" data-title="<?php echo $decision; ?>" data-content="<?php echo $explanation; ?>" data-trigger="hover"><?php echo $score; ?></button>
+						</p>
+<?php
 						
 						echo "<h2>Log</h2>";
 						
@@ -97,5 +103,10 @@
 			</section>
 		</div><!-- container -->
 		<?php include( 'components/footer.php' ); ?>
+		<script>
+							$(function ()  { 
+								$("#theScore").popover();  
+							});
+						</script>
 	</body>
 </html>

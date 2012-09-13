@@ -59,6 +59,15 @@ strong, b {
 	color: #fff;
 }
 
+.popover {
+	color: #444;
+	font-size: 0.95em;
+}
+.popover-title {
+	font-size: 1.05em;
+	color: #222;
+}
+
 @media only screen and (min-width: 980px) {
     body {
         padding-top:90px;
