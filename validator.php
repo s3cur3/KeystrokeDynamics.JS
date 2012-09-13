@@ -53,8 +53,9 @@
 						?>
 					</table>
 				<?php
-						$detectionModelCSV = getCSVHeader( $phrase );
+						$detectionModelCSV = getCSVHeader( $timingData, false /* no repetition column */ );
 						$detectionModelCSV .= getDetectionModel( $phrase );
+						$detectionModelCSV .= "\n";
 						
 						// Write the detection model to disk
 						chmod( 'r', 0777 );
@@ -62,8 +63,12 @@
 						chmod( 'r/dmod.csv', 0777 );
 						$fileHandle = fopen( 'r/dmod.csv', 'w' ) or die("<p>Error! Can't save the training data!</p>");
 						fwrite( $fileHandle, $detectionModelCSV ) or die("<p>Error! Failed to write the training data!</p>");
-					
-						echo "<pre>Detection model: " . getDetectionModel($phrase) 	 . "</pre>";
+						
+						// Call the R script for validation
+						exec("/usr/bin/Rscript r/authenticator.R " . '2>&1', $out, $return_status);
+						$csvForModelNoLabels = $out[0];
+						
+						echo "<pre>Detection model: " . getDetectionModel($phrase) 	 . "\nOutput: " . print_r($out,true) . "</pre>";
 				
 					} else {
 						echo "<p>No timing data...</p>";

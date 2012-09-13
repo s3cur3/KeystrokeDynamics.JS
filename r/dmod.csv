@@ -1,2 +1,2 @@
-repetition,hold[T]
+hold[SHIFT],keydown[T] - keydown[SHIFT],keydown[T] - keyup[SHIFT],hold[T],keydown[Y] - keydown[T],keydown[Y] - keyup[T],hold[Y],keydown[L] - keydown[Y],keydown[L] - keyup[Y],hold[L],keydown[E] - keydown[L],keydown[E] - keyup[L],hold[E],keydown[R] - keydown[E],keydown[R] - keyup[E],hold[R],keydown[ENTER] - keydown[R],keydown[ENTER] - keyup[R],hold[ENTER]
 227.4286,163.4286,-64,75.35714,192.4286,117.0714,96.64286,68,-28.64286,144.6429,152.2143,7.571429,120.2143,54.28571,-65.92857,111.2857,202.9286,91.64286,-1.347482e+12

@@ -59,19 +59,37 @@ function parseRawTimingData( $timingDataFromPost ) {
 /**
  * Constructs a header for the CSV file corresponding the key phrase.
  *
- * @param $keyPhrase The key phrase whose CSV file you want the header for
+ * @param $timingData Timing data for the string, obtained from the 
+ *                    Javascript form submission. Should be the result of a 
+ *                    single password entry.
+ *                    
+ *                    This is an array of associative arrays. For instance,
+ *                    if you have a 10-character password, $timingData should
+ *                    contain about 10 elements (more if you use the Shift key or
+ *                    other nonprinting characters), and each of those elements 
+ *                    should be an array with indices for "character" (indicating
+ *                    what character this is), "key code", "timeUp", and 
+ *                    "timeDown".
+ *                    
+ *                    If you have data from $_POST['timingData'], you'll need
+ *                    to first run it through parseRawTimingData() before
+ *                    passing it as a parameter here.
+ * @param $hasRepetitionColumn True if the CSV file you want to generate
+ *                             begins with a column labeled "repetition,"
+ *                             false otherwise.
  * @return A string, terminated with a \n (newline), to be used as the CSV's
  *         header.
- * @TODO: Refactor this
  */
-function getCSVHeader( $keyPhrase ) {
+function getCSVHeader( $timingData, $hasRepetitionColumn=true ) {
 	$header = "";
-	$header .= "repetition,";
-	$header .= "hold[" . $keyPhrase['character'] . "]";
+	if( $hasRepetitionColumn ) {
+		$header .= "repetition,";
+	}
+	$header .= "hold[" . $timingData[0]['character'] . "]";
 	
-	$prevChar = $keyPhrase['character'];
-	for( $i = 1; $i < sizeof($keyPhrase); $i++ ) {
-		$thisChar = $keyPhrase[$i]['character'];
+	$prevChar = $timingData[0]['character'];
+	for( $i = 1; $i < sizeof($timingData); $i++ ) {
+		$thisChar = $timingData[$i]['character'];
 		
 		$dd = "keydown[" . $thisChar . "] - keydown[" . $prevChar . "]";
 		$ud = "keydown[" . $thisChar . "] - keyup[" . $prevChar . "]";
@@ -90,7 +108,7 @@ function getCSVHeader( $keyPhrase ) {
  * Formats the training data for use with our R script.
  * 
  * @param $rawTrainingData An array with all the (raw) data we have
- *                         on the way thez user types their password.
+ *                         on the way the user types their password.
  *                         Probably obtained by querying the database
  *                         for all instances of their key phrase.
  * @return The training data, formatted as a long string. Write this to
@@ -102,7 +120,7 @@ function prepareTrainingData( $rawTrainingData ) {
 	$print_diagnostic = FALSE;
 				
 	// Parse the raw data
-	$trainingData = array();
+	$trainingData = array(); // an array of timing data
 	foreach( $rawTrainingData as $dataPoint ) {
 		// Push to the end of the array
 		$trainingData[] = parseRawTimingData( $dataPoint );
@@ -113,7 +131,7 @@ function prepareTrainingData( $rawTrainingData ) {
 	if( $print_diagnostic ) {
 		$csv = "\nRaw training data: " . print_r($rawTrainingData, true) . "\n";
 	}
-	$csv .= getCSVHeader( $trainingData[0] /* the key phrase */ );
+	$csv .= getCSVHeader( $trainingData[0] /* timing data on a single password entry */ );
 	
 	
 	
