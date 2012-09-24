@@ -1,7 +1,7 @@
 <!DOCTYPE HTML>
 <html>
 	<?php
-		$title = "Web Authentication via Keystroke Dynamics";
+		$title = "Finished Training the Identity Verification Component";
 		include( 'components/head.php' );
 		include_once( 'components/database_fns.php' );
 		include_once( 'components/keystroke_data_handlers.php' );
@@ -42,11 +42,27 @@
 					
 					// Call the R script for training
 					exec("/usr/bin/Rscript r/trainer.R" . ' 2>&1', $out, $return_status);
-					$csvForModelNoLabels = $out[0];
-					echo( "<pre>Detection model: " . $csvForModelNoLabels . "</pre>" );
+					
+					// Parse the output
+					$startingKey = array_search( "[1] \"Serializing detection model\"", $out );
+					$serializedData = "";
+					for( $i = $startingKey + 1; $i < sizeof($out); $i++ ) {
+						// Remove the damn line number (like "[1234]") from R's output
+						$serializedData .= preg_replace( "/\[[0-9]+\] /", "", $out[$i] );
+					}
+					
+					// Compress spaces in the serialized data
+					$serializedData = preg_replace( '/\s+/', ' ', $serializedData );
+					// Remove quotes as necessary
+					$serializedData = preg_replace( '/"/', '', $serializedData );
+					
+					
+					/*echo( "<pre>Started at array index $startingKey \n Detection model: " . $serializedData 
+						. "\nAll out: " . print_r($out, true)
+						. "</pre>" );*/
 					
 					// Store the output from the script (a vector with the trained classification)
-					store_detection_model( $phrase, $csvForModelNoLabels );
+					storeDetectionModel( $phrase, $serializedData );
 				?>
 				<p>Successfully created your account using key phrase <strong><?php echo $phrase;?></strong>.</p>
 			</section>

@@ -2,32 +2,46 @@
 
 include_once( 'database_fns.php' );
 
+
+function writeStringToFile( &$content, $fileName, $mode) { 
+	if (file_exists($fileName)) {
+		if (!is_writable($fileName)) {
+			if (!chmod($fileName, 0666)) {
+				 echo "Cannot change the mode of file ($fileName)";
+				 exit;
+			};
+		}
+	}
+	
+	if( !$fp = @fopen($fileName, $mode) ) {
+		echo "Cannot open file ($fileName)";
+		exit;
+	}
+	if( fwrite($fp, $content) === FALSE ) {
+		echo "Cannot write to file ($fileName)";
+		exit;
+	} 
+	if (!fclose($fp)) {
+		echo "Cannot close file ($fileName)";
+		exit;
+	}
+}
+	
 /**
  * Writes the specified string to the file. This file will go in
- * the r/ directory. If no extension is specified, we will append
- * ".csv" to your specified name.
+ * the r/ directory.
  * @param $string The string to write to the file
  * @param $fileName The name of the file to which we should write.
  * @param $append True if we should append to the file if it exists,
  *                false if we should overwrite it instead
  */
 function writeStringToFileForR( $string, $fileName, $append=false ) {
-	chmod( 'r', 0777 );
-	touch( 'r/dmod.csv' );
-	chmod( 'r/dmod.csv', 0777 );
-	
 	$mode = 'w';
 	if( $append ) {
 		$mode = 'a';
 	}
 	
-	if( !strpos($fileName, ".") ) {
-		// No extension; append ".csv"
-		$fileName .= ".csv";
-	}
-	
-	$fileHandle = fopen( "r/" . $fileName, $mode ) or die("<p>Error! Can't open the file!</p>");
-	fwrite( $fileHandle, $string ) or die("<p>Error! Failed to write the file!</p>");
+	writeStringToFile( $string, "r/" . $fileName, $mode );
 }
 
 /**

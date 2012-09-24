@@ -1,6 +1,9 @@
 // Data structure (treated as a list) that will store a
 // series of Keystrokes
-var keyLog = new Array();
+var keyLog = [];
+var thisPagesForm;
+var thisPagesInputField;
+var thisPagesInputFieldId;
 
 /**
  * Defines the Keystroke prototype
@@ -26,14 +29,51 @@ Keystroke.prototype.serialize = keystrokeSerialize;
 
 
 /**
+ * Clears the form and displays a pop-up notifying the user
+ * that they made a typo
+ */
+function resetAndComplainAfterTypo() {
+    resetFormAndTimingData(thisPagesInputField);
+    // Insert an alert
+    $("#inputKeyPhraseHelp").hide();
+    //$("#inputKeyPhrase").unbind('focus');
+    if ($('.alert').length == 0) {
+        thisPagesForm.prev().before(
+            '<div class="alert alert-block alert-error fade in span6 pull-right">'
+                + '<button type="button" class="close" data-dismiss="alert" data-close="bindHelpPopup()">×</button>'
+                + '<h4 class="alert-heading">It looks like you made a typo</h4>'
+                + '<p>We\'ve reset the form so that you can type your password from the beginning.</p>'
+                + '<p>'
+                + '<a class="btn" href="#" onclick="$(\'.alert\').alert(\'close\'); bindHelpPopup()">OK</a>'
+                + '</p>'
+                + '</div>');
+    }
+}
+
+
+/**
  * Uses the jQuery's keydown() and keyup() functions to monitor
  * keystrokes in the "key phrase" text box. Fills the keyLog data
  * structure with this information.
  */
 function monitor( textBox ) {
     $("#inputKeyPhrase").keydown(function(event) {
-        var i = keyLog.length; // index of a new item to the list
-        keyLog[i] = new Keystroke( event.keyCode, event.timeStamp, 0 );
+        var eventNeedsRecording = true;
+        var i = keyLog.length;
+
+        if( event.keyCode == 8 ) { // backspace
+            resetAndComplainAfterTypo();
+            eventNeedsRecording = false;
+        } else if( i > 0 ) { // If the keylog isn't empty
+            if( keyLog[i - 1].timeDown == event.timeStamp
+                && keyLog[i - 1].keyCode == event.keyCode ) { // if this isn't identical to the previous
+                eventNeedsRecording = false;
+            }
+        }
+
+        if( eventNeedsRecording ) {
+            keyLog[i] = new Keystroke( event.keyCode, event.timeStamp, 0 );
+        }
     });
 
     $("#inputKeyPhrase").keyup(function(event) {
@@ -42,6 +82,7 @@ function monitor( textBox ) {
         for( i = keyLog.length - 1; i >= 0; i-- ) {
             if( keyLog[i].keyCode == event.keyCode && keyLog[i].timeUp == 0 ) {
                 keyLog[i].timeUp = event.timeStamp;
+                break;
             }
         }
     });
@@ -55,27 +96,33 @@ function unMonitor( textBox ) {
 
 
 /**
- * Binds functions to various events on the page.
- * @param idToMonitor The ID of the element to bind (should begin with a #)
+ * Binds the listeners that
+ * @param textField
  */
-function bindKeystrokeListener( idToMonitor ) {
-    // Clear the key phrase, so that if you reloaded
-    // this page, it's not populated with the old data
-    var textField = $(idToMonitor);
-    textField.val('');
-
-    textField.focus(monitor);
-    textField.blur(unMonitor);
-
-    var textFieldHelp = $(idToMonitor + "Help");
+function bindHelpPopup() {
+    var textFieldHelp = $( "#" + thisPagesInputFieldId + "Help");
     // Pretty stuff
     textFieldHelp.fadeOut('slow');
-    textField.focus(function () {
+    thisPagesInputField.focus(function () {
         textFieldHelp.fadeIn();
     });
-    textField.blur(function () {
+    thisPagesInputField.blur(function () {
         textFieldHelp.fadeOut();
     });
+}
+
+/**
+ * Binds functions to various events on the page.
+ */
+function bindKeystrokeListener() {
+    // Clear the key phrase, so that if you reloaded
+    // this page, it's not populated with the old data
+    thisPagesInputField.val('');
+
+    thisPagesInputField.focus(monitor);
+    thisPagesInputField.blur(unMonitor);
+
+    bindHelpPopup();
 }
 
 SubmitType = {
@@ -83,6 +130,29 @@ SubmitType = {
     LOGIN : 'formLogin',
     TRAIN : 'formTrain'
 }
+
+function resetFormAndTimingData( inputField ) {
+    inputField.val('');
+    inputField.focus();
+    inputField.unbind('blur');
+    // Reset the keyLog and the counter
+    keyLog.length = 0;
+    keyLog = [];
+}
+
+
+/**
+ * Serializes the complete key log
+ * @return A string version of the full keyLog
+ */
+function getSerializedTimingData() {
+    var s = "";
+    for (var i = 0; i < keyLog.length; i++) {
+        s += keyLog[i].serialize() + " ";
+    }
+    return s;
+}
+
 
 /**
  * When the login form is submitted, this adds the data
@@ -96,6 +166,8 @@ function handleSubmission( submitType ) {
     var phrase = $("#inputKeyPhrase");
 
     form.submit(function (event) {
+        var dataIsOkay = true;
+
         if( submitType == SubmitType.LOGIN ) {
             // Write to diagnostic log
             var theLog = $("#theLog");
@@ -108,48 +180,41 @@ function handleSubmission( submitType ) {
         } else if( submitType == SubmitType.TRAIN ) {
             // If the password was wrong, inform the user
             if( phrase.val() != phrase.attr('placeholder') ) {
-                $("#inputKeyPhraseHelp").html("Sorry, you need to type your key phrase <strong>exactly as before.</strong>")
-                phrase.val('');
-                phrase.focus();
-                phrase.unbind('blur');
-
-                // Reset the keyLog and the counter
-                keyLog = new Array();
+                resetAndComplainAfterTypo();
+                dataIsOkay = false;
                 return false;
             }
         }
 
-        // Serialize the timing data
-        var serializedKeyLog = "";
-        for (var i = 0; i < keyLog.length; i++) {
-            serializedKeyLog += keyLog[i].serialize() + " ";
-        }
-
         // Add the invisible field which will allow us to send timing data
-        timingData.val(serializedKeyLog);
-        return true;
+        if( dataIsOkay ) {
+            timingData.val(getSerializedTimingData());
+            return true;
+        }
+        return false;
     });
 }
 
+
+
 function main() {
     // Bind a listener to the key phrase input field
-    if( $("#inputKeyPhrase") ) {
-        bindKeystrokeListener( "#inputKeyPhrase" );
-    }
-
-    for( var i = 0; i < 10; i++ ) {
-        if( $("#inputKeyPhrase" + i) ) {
-            bindKeystrokeListener( "#inputKeyPhrase" + i );
-        }
+    if( $("#inputKeyPhrase").length ) {
+        thisPagesInputFieldId = "inputKeyPhrase";
+        thisPagesInputField = $("#" + thisPagesInputFieldId );
+        bindKeystrokeListener();
     }
 
     // Bind the listeners only if there is a log in form
     var formType;
     if( $("#formLogin").length ) {
+        thisPagesForm = $("#formLogin");
         formType = SubmitType.LOGIN ;
     } else if( $("#formCreate").length ) {
+        thisPagesForm = $("#formCreate");
         formType = SubmitType.CREATE;
     } else if( $("#formTrain").length ) {
+        thisPagesForm = $("#formTrain");
         formType = SubmitType.TRAIN;
     }
     handleSubmission( formType );

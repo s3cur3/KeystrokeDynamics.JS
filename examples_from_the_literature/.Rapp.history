@@ -1,0 +1,144 @@
+install.packages("ROCR")
+install.packages("MASS")
+install.packages("stats")
+?read.delim
+require("ggplot2")
+install.packages("ggplot2", dependencies = TRUE, type = "source")
+require("ggplot2")
+setwd("~/Dropbox/school/Research/KeystrokeDynamics.JS/examples_from_the_literature/")
+datafile <- 'DSL-StrongPasswordData.txt';#
+if( ! file.exists(datafile) )#
+  stop( "Password data file ",datafile," does not exist");#
+#
+# Retrieve the data and the list of subjects#
+X <- read.table( datafile, header = TRUE );#
+subjects <- sort( levels( X$subject ) );#
+x.original <- X;#
+#
+#print("\n\n\nSummary")#
+#print(summary(X));#
+# Simulate the use of a 4 ms timer in the timing data#
+X <- subset( X,#
+                              # subset: logical expression indicating#
+                              # elements or rows to keep: missing values#
+                              # are taken as false.#
+                              subset = TRUE,#
+                              # select: expression, indicating columns#
+                              # to select from a data frame.#
+                              #   exclude subj., session num, and rep cols#
+                              select = -c( subject, sessionIndex, rep ) )
+summary(X)
+X <- sapply( X, function(x) if("factor" %in% class(x) ) {#
+               return (x)#
+           } else { round.to.4ms(x) } )
+round.to.4ms <- function(time.in.seconds) {#
+  # Convert to ms#
+  time.in.ms <- time.in.seconds * 1000#
+  rounding.factor <- 4;#
+  rounded.ms <- floor(time.in.ms/rounding.factor) * rounding.factor;#
+  return( rounded.ms / 1000 );#
+}
+X <- sapply( X, function(x) if("factor" %in% class(x) ) {#
+               return (x)#
+           } else { round.to.4ms(x) } )
+summary(X)
+summary(x.original)
+X$subject <- x.original$subject;
+summary(X)
+datafile <- 'DSL-StrongPasswordData.txt';#
+if( ! file.exists(datafile) )#
+  stop( "Password data file ",datafile," does not exist");#
+#
+# Retrieve the data and the list of subjects#
+X <- read.table( datafile, header = TRUE );#
+subjects <- sort( levels( X$subject ) );#
+x.original <- X;#
+#
+#print("\n\n\nSummary")#
+#print(summary(X));#
+# Simulate the use of a 4 ms timer in the timing data#
+X <- subset( X,#
+                              # subset: logical expression indicating#
+                              # elements or rows to keep: missing values#
+                              # are taken as false.#
+                              subset = TRUE,#
+                              # select: expression, indicating columns#
+                              # to select from a data frame.#
+                              #   exclude subj., session num, and rep cols#
+                              select = -c( subject, sessionIndex, rep ) )
+X <- sapply( X, function(x) if("factor" %in% class(x) ) {#
+               return (x)#
+           } else { round.to.4ms(x) } )
+head(x.original$subject)
+X[["subject"]] <- NA
+summary(X)
+datafile <- 'DSL-StrongPasswordData.txt';#
+if( ! file.exists(datafile) )#
+  stop( "Password data file ",datafile," does not exist");#
+#
+# Retrieve the data and the list of subjects#
+X <- read.table( datafile, header = TRUE );#
+subjects <- sort( levels( X$subject ) );#
+x.original <- X;#
+#
+#print("\n\n\nSummary")#
+#print(summary(X));#
+# Simulate the use of a 4 ms timer in the timing data#
+X <- subset( X,#
+                              # subset: logical expression indicating#
+                              # elements or rows to keep: missing values#
+                              # are taken as false.#
+                              subset = TRUE,#
+                              # select: expression, indicating columns#
+                              # to select from a data frame.#
+                              #   exclude subj., session num, and rep cols#
+                              select = -c( subject, sessionIndex, rep ) )
+summary(X)
+X <- sapply( X, function(x) if("factor" %in% class(x) ) {#
+               return (x)#
+           } else { round.to.4ms(x) } )
+summary(X)
+x.backup <- X
+X$subject
+X$subject <- NA
+x.backup <- X
+datafile <- 'DSL-StrongPasswordData.txt';#
+if( ! file.exists(datafile) )#
+  stop( "Password data file ",datafile," does not exist");#
+#
+# Retrieve the data and the list of subjects#
+X <- read.table( datafile, header = TRUE );#
+subjects <- sort( levels( X$subject ) );#
+x.original <- X;#
+#
+#print("\n\n\nSummary")#
+#print(summary(X));#
+# Simulate the use of a 4 ms timer in the timing data#
+X <- subset( X,#
+                              # subset: logical expression indicating#
+                              # elements or rows to keep: missing values#
+                              # are taken as false.#
+                              subset = TRUE,#
+                              # select: expression, indicating columns#
+                              # to select from a data frame.#
+                              #   exclude subj., session num, and rep cols#
+                              select = -c( subject, sessionIndex, rep ) )
+x.backup <- X
+X <- sapply( X, function(x) if("factor" %in% class(x) ) {#
+               return (x)#
+           } else { round.to.4ms(x) } )
+X <- data.frame(X, x.original$subject)
+summary(X)
+X <- data.frame(X, x.original$sessionIndex)
+X <- data.frame(X, x.original$rep)
+summary(X)
+?data.frame
+X <- x.backup
+X <- data.frame(X, x.original)
+summary(X)
+x.identifiers <- subset( x.original, subset = TRUE, select = c( subject, sessionIndex, rep ) );
+X <- x.backup
+X <- data.frame(X, x.identifiers)
+summary(X)
+?vector
+?c

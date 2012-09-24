@@ -1,7 +1,7 @@
 <!DOCTYPE HTML>
 <html>
 	<?php
-		$title = "Web Authentication via Keystroke Dynamics";
+		$title = "Training the Identity Verification Component";
 		include( 'components/head.php' );
 		include_once( 'components/database_fns.php' );
 	?>

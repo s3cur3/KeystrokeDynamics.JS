@@ -1,0 +1,2 @@
+hold[T],keydown[E] - keydown[T],keydown[E] - keyup[T],hold[E],keydown[S] - keydown[E],keydown[S] - keyup[E],hold[S],keydown[T] - keydown[S],keydown[T] - keyup[S],hold[T],keydown[I] - keydown[T],keydown[I] - keyup[T],hold[I],keydown[N] - keydown[I],keydown[N] - keyup[I],hold[N],keydown[G] - keydown[N],keydown[G] - keyup[N],hold[G],keydown[ENTER] - keydown[G],keydown[ENTER] - keyup[G],hold[ENTER]
+127,96,-31,222,103,-119,143,96,-47,120,153,33,151,96,-55,103,63,-40,80,121,41,0

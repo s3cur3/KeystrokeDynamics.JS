@@ -212,7 +212,7 @@ evaluateSubject <- function( X, evalSubject, detectorTrain, detectorScore ) {
                               # elements or rows to keep: missing values
                               # are taken as false.
                               subset = ( subject == evalSubject &
-                                        sessionIndex <= 4 ),
+                                        sessionIndex <= 1 & rep <= 15 ),
                               # select: expression, indicating columns
                               # to select from a data frame.
                               #   exclude subj., session num, and rep cols
@@ -253,7 +253,7 @@ evaluateSubject <- function( X, evalSubject, detectorTrain, detectorScore ) {
 #######################
 cat("Loading the data file\n");
 
-datafile <- 'DSL-StrongPasswordData.txt';
+datafile <- 'few_examples.txt';
 if( ! file.exists(datafile) )
   stop( "Password data file ",datafile," does not exist");
 

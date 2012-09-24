@@ -203,7 +203,7 @@ function dump_training_data() {
  * @param $key_phrase
  * @param $output The output training model
  */
-function store_detection_model( $key_phrase, $output ) {
+function storeDetectionModel( $key_phrase, $output ) {
 	global $db_hostname, $db_username, $db_password, $db_database, $table_training_data, $table_training_output;
 	
 	$db_server = mysql_connect( $db_hostname, $db_username, $db_password );
@@ -214,13 +214,14 @@ function store_detection_model( $key_phrase, $output ) {
 	
 	
 	// Prevent SQL injection by using a placeholder query
-	$placeholder_query = 'PREPARE insertion FROM "INSERT INTO '. $table_training_output . ' VALUES(?,?);"';
+	$placeholder_query = 'PREPARE insertion FROM "INSERT INTO '. $table_training_output . ' VALUES(?,?,?);"';
 	mysql_query( $placeholder_query );
 	
-	$set_query = 'SET @key_phrase = "' . $key_phrase . '", @output = "' . $output . '";';
+	//$set_query = 'SET @modified=NULL, @key_phrase = "' . $key_phrase . '", @serialized_model = "' . "A0 12" . '";';
+	$set_query = 'SET @modified=NULL, @key_phrase = "' . $key_phrase . '", @serialized_model = "' . $output . '";';
 	mysql_query( $set_query );
 
-	$execute_query = 'EXECUTE insertion USING @key_phrase, @output;';
+	$execute_query = 'EXECUTE insertion USING @modified, @key_phrase, @serialized_model;';
 	mysql_query( $execute_query );
 	
 	$deallocate_query = 'DEALLOCATE PREPARE insertion;';
@@ -268,7 +269,7 @@ function getDetectionModel( $key_phrase ) {
 	// xyz in the current query.
 	extract($r);
 	
-	return $output; // the value from the column "output" in the SQL query
+	return $serialized_model; // the value from the column "serialized_model" in the SQL query
 }
 
 ?>

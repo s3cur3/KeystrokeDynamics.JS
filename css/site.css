@@ -68,6 +68,15 @@ strong, b {
 	color: #222;
 }
 
+.alert-heading {
+	font-weight: bold;
+	text-shadow: 0 1px 0 rgba(0, 0, 0, 0.5) !important;
+}
+
+.form-horizontal .control-group::after {
+	display: inline !important;
+}
+
 @media only screen and (min-width: 980px) {
     body {
         padding-top:90px;

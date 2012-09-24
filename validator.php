@@ -21,7 +21,7 @@
 					$phrase = cleanse_sql_and_html($_POST['inputKeyPhrase']);
 				
 					// Reconstruct the serialized data
-					if(isset($_POST['timingData'])) {
+					if( isset($_POST['timingData']) ) {
 						echo "<p>Great! You sent timing data!</p>";
 						echo "<p>The phrase you entered was <code>" 
 							. $phrase . "</code></p>";
@@ -33,10 +33,9 @@
 						
 						
 						// Write the detection model to a file for use by the authenticator.R script
-						$detectionModelCSV = getCSVHeader( $timingData, false /* no repetition column */ );
-						$detectionModelCSV .= getDetectionModel( $phrase );
-						$detectionModelCSV .= "\n";
-						writeStringToFileForR( $detectionModelCSV, "dmod.csv" );
+						$serializedDetectionModel = getDetectionModel( $phrase );
+						$serializedDetectionModel .= "\n";
+						writeStringToFileForR( $serializedDetectionModel, "dmod" );
 						
 						// Write the timing data for this attempted password entry to a file 
 						$thisAttemptCSV = getCSVHeader( $timingData, false /* no repetition column */ );
@@ -45,32 +44,42 @@
 						
 						
 						// Call the R script for validation
-						exec("/usr/bin/Rscript r/authenticator.R " . '2>&1', $out, $return_status);
-						$score = floatval(end($out));
+						exec("/usr/bin/Rscript r/authenticator.R " . '2>&1', $out, $returnStatus);
 						
-						// Evaluate whether you're an impersonator or not
-						$msgClass = "btn";
-						$decision = "You're probably not an impersonator.";
-						$explanation = "We're not really sure what to think of you. We'll let you pass, though.";
-						if( $score > 0.5 ) {
-							$msgClass .= " btn-danger";
-							$decision = "You're an impersonator.";
-							$explanation = "The chances are very low that you are who you say you are.";
-						} else if( $score < 0.3 ) {
-							$msgClass .= " btn-success";
-							$decision = "You're definitely not an impersonator.";
-							$explanation = "The chances are very good that you are who you say you are.";
-						}
-?>					
-						<p>Likelihood that you are a haxx0r:
-							<button  rel="popover" id="theScore" class="<?php echo $msgClass; ?>" data-title="<?php echo $decision; ?>" data-content="<?php echo $explanation; ?>" data-trigger="hover"><?php echo $score; ?></button>
-						</p>
+						if( $returnStatus === 0 ) {
+						
+							$score = floatval(end($out));
+							
+							// Evaluate whether you're an impersonator or not
+							$msgClass = "btn";
+							$decision = "You're probably not an impersonator.";
+							$explanation = "We're not really sure what to think of you. We'll let you pass, though.";
+							if( $score > 0.5 ) {
+								$msgClass .= " btn-danger";
+								$decision = "You're an impersonator.";
+								$explanation = "The chances are very low that you are who you say you are.";
+							} else if( $score < 0.3 ) {
+								$msgClass .= " btn-success";
+								$decision = "You're definitely not an impersonator.";
+								$explanation = "The chances are very good that you are who you say you are.";
+							}
+	?>					
+							<p>Likelihood that you are a haxx0r:
+								<button  rel="popover" id="theScore" class="<?php echo $msgClass; ?>" data-title="<?php echo $decision; ?>" data-content="<?php echo $explanation; ?>" data-trigger="hover"><?php echo $score; ?></button>
+							</p>
 <?php
+						} else { // error in the R function
+?>
+							<p>There was an error processing your login data. Perhaps you need to <a href="create_account.php">create an account</a>?</p>
+<?php
+						}
 						
 						echo "<h2>Log</h2>";
 						
-						echo "<pre>Detection model: " . getDetectionModel($phrase)
-							. "\nThis attempt: $thisAttemptCSV </pre>";
+						echo "<pre>Detection model: " //. getDetectionModel($phrase)
+							. "\nThis attempt: $thisAttemptCSV"
+							. "\nReturn status: $returnStatus"
+							. "\nData from output: ". print_r($out, true) . "</pre>";
 							
 ?>
 						<table width="80%" border="1" cellpadding="5px">
