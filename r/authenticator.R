@@ -50,14 +50,16 @@ library( stats );
 # returned in a vector whose length is equal to the number of
 # password-timing vectors in the scoring matrix.
 
-mahalanobisScore <- function( dmod, YScore ) {
-  p <- length( dmod$mean );
+mahalanobisScore <- function( detection.model, YScore ) {
+  p <- length( detection.model$mean );
   n <- nrow( YScore );
 
   if( ncol(YScore) != p ) stop("Training/test feature length mismatch ");
   
-  scores <- mahalanobis( YScore, dmod$mean, dmod$covInv, inverted=TRUE );
-
+  scores <- mahalanobis( YScore,
+                         detection.model$mean,
+                         detection.model$covInv,
+                         inverted=TRUE );
   return( scores );
 }
 
@@ -76,10 +78,23 @@ current.attempt.file <- 'r/current_attempt.csv';
 if( ! file.exists(current.attempt.file) ) {
     stop( "Current attempt data file ", current.attempt.file, " does not exist");
 }
-YScore <- as.matrix( read.csv( current.attempt.file,
-                               nrows=2,
-                               header=TRUE,
-                               stringsAsFactors=FALSE ) );
+YScore <- read.csv( current.attempt.file,
+                    nrows=2,
+                    header=TRUE,
+                    stringsAsFactors=FALSE );
+
+
+# Drop the columns/rows from our data related to the Enter key's time up
+# (this is not recorded reliably by our Javascript)
+#length.with.Enters <- length( detection.model$mean );
+#length.new <- length.with.Enters - 2
+#detection.model$mean <- detection.model$mean[(1:length.new)]
+#YScore <- YScore[,(1:length.new)]
+#detection.model$covInv <- detection.model$covInv[(1:length.new),(1:length.new)]
+
+
+# Make the current attempt data a matrix
+YScore <- as.matrix( YScore )
 
 # Get the "score" (distance between the model and this attempt
 score <- mahalanobisScore( detection.model, YScore );
@@ -99,4 +114,4 @@ if( prob.imposter > 1.0 ) {
 
 # Return to PHP
 write( "Probability you are an imposter:", "" );
-write( prob.imposter, "" )
+write( score, "" )

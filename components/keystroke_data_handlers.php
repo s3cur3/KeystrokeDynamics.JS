@@ -174,12 +174,15 @@ function getCSVLineFromTimingData( $timingData, $repetition = -1 ) {
 	$csv .= $timingData[0]['timeHeld']; // only care about time held for pos. 0
 	
 	// For each (other) character in the password . . .
+	$MS_TO_SECONDS = 1.0/1000.0;
 	for( $i = 1; $i < sizeof($timingData); $i++ ) {
-		$dd = $timingData[$i]['timeDown'] - $timingData[$i-1]['timeDown'];
-		$ud = $timingData[$i]['timeDown'] - $timingData[$i-1]['timeUp'];
-		$h = $timingData[$i]['timeHeld'];
+		$dd = $MS_TO_SECONDS * ($timingData[$i]['timeDown'] - $timingData[$i-1]['timeDown']);
+		$ud = $MS_TO_SECONDS * ($timingData[$i]['timeDown'] - $timingData[$i-1]['timeUp']);
+		$h = $MS_TO_SECONDS * ($timingData[$i]['timeHeld']);
 		
 		if( $h < 0 ) 	$h = 0;
+		if( $ud > 1000 ) $ud = 0.1; // some neutral value
+		
 		
 		$csv .= "," . $dd . "," . $ud . "," . $h;
 	}

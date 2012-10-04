@@ -64,6 +64,8 @@ function monitor( textBox ) {
         if( event.keyCode == 8 ) { // backspace
             resetAndComplainAfterTypo();
             eventNeedsRecording = false;
+        } else if( event.keyCode == 13 ) { // Ignore enters
+            eventNeedsRecording = false;
         } else if( i > 0 ) { // If the keylog isn't empty
             if( keyLog[i - 1].timeDown == event.timeStamp
                 && keyLog[i - 1].keyCode == event.keyCode ) { // if this isn't identical to the previous
