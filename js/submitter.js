@@ -1,9 +1,6 @@
 // Data structure (treated as a list) that will store a
 // series of Keystrokes
 var keyLog = [];
-var thisPagesForm;
-var thisPagesInputField;
-var thisPagesInputFieldId;
 
 /**
  * Types of forms that we may work with
@@ -217,6 +214,8 @@ function handleSubmission( submitType ) {
 
 
 function main() {
+    inputIDsToMonitor = [ "#inputKeyPhrase", "#inputKeyPhraseDropdown" ]
+
     // Bind a listener to the key phrase input field
     if( $("#inputKeyPhrase").length ) {
         thisPagesInputFieldId = "inputKeyPhrase";
@@ -229,7 +228,7 @@ function main() {
         bindKeystrokeListener();
     }
 
-    // Bind the listeners only if there is a log in form
+    // Handle submissions
     var formType;
     if( $("#formLogin").length ) {
         thisPagesForm = $("#formLogin");

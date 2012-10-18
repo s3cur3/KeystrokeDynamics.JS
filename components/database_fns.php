@@ -1,12 +1,7 @@
 <?php
 
 global $db_hostname, $db_username, $db_password, $db_database;
-$db_hostname = "localhost";
-$db_username = "root";
-$db_password = "NTF96pafzdwy";
-$db_database = "keystroke_data";
-$table_training_data = "training";
-$table_training_output = "training_out";
+include_once( 'site_variables.php' );
 
 /**
  * Sanitizes a string, removing both HTML and
