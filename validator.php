@@ -19,15 +19,22 @@
 				<h3>Here's the information we got.</h3>
 <?php
 					$phrase = cleanse_sql_and_html($_POST['inputKeyPhrase']);
+					$phraseDropdown = cleanse_sql_and_html($_POST['inputKeyPhraseDropdown']);
+					
+					$idSuffix = '';
+					if( strlen($phrase) == 0 && strlen($phraseDropdown) > 0 ) {
+						$idSuffix = 'Dropdown';
+						$phrase = $phraseDropdown;
+					}
 				
 					// Reconstruct the serialized data
-					if( isset($_POST['timingData']) ) {
-						echo "<p>Great! You sent timing data!</p>";
+					if( isset($_POST['timingData' . $idSuffix]) ) {
+						echo "<p>Great! You sent timing data!", $_POST['timingData' . $idSuffix], "</p>";
 						echo "<p>The phrase you entered was <code>" 
 							. $phrase . "</code></p>";
 						
 						// Split the POSTed data on spaces (to get individual keystrokes)
-						$timingData = parseRawTimingData( $_POST['timingData'] );
+						$timingData = parseRawTimingData( $_POST['timingData' . $idSuffix] );
 				
 						// TODO: Die if the key phrase doesn't match any known
 						
@@ -109,15 +116,22 @@
 <?php
 					} else {
 						echo "<p>No timing data...</p>";
+						echo "<p>Timing data: ";
+						print_r($_POST['timingData']);
+						echo "</p><p>Timing data dropdown: ";
+						print_r($_POST['timingDataDropdown']);
+						echo "</p><p>Suffix $idSuffix </p>";
+						echo "Timing data dropdown: ";
+						print_r($_POST['timingData' . $idSuffix]);
 					}
 ?>
 			</section>
 		</div><!-- container -->
 		<?php include( 'components/footer.php' ); ?>
 		<script>
-							$(function ()  { 
-								$("#theScore").popover();  
-							});
-						</script>
+			$(function ()  { 
+				$("#theScore").popover();  
+			});
+		</script>
 	</body>
 </html>

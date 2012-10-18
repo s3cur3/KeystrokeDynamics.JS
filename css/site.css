@@ -25,6 +25,18 @@ strong, b {
     font-size: 1.2em;
 }
 
+.dropdown-menu {
+	background-color: #333;
+	padding: 1em 1em;
+}
+
+.dropdown-menu#formLogin {
+	padding: 1em 1em;
+}
+.dropdown-menu .control-group {
+	margin-bottom: 0;
+}
+
 .btn.selected {
     background-color: #49afcd;
     *background-color: #2f96b4;

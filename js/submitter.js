@@ -6,6 +6,16 @@ var thisPagesInputField;
 var thisPagesInputFieldId;
 
 /**
+ * Types of forms that we may work with
+ */
+SubmitType = {
+    CREATE : 'formCreate',
+    LOGIN : 'formLogin',
+    TRAIN : 'formTrain',
+    DROPDOWN: 'formLoginDropdown'
+}
+
+/**
  * Defines the Keystroke prototype
  */
 function Keystroke(keyCode, timeDown, timeUp) {
@@ -57,7 +67,7 @@ function resetAndComplainAfterTypo() {
  * structure with this information.
  */
 function monitor( textBox ) {
-    $("#inputKeyPhrase").keydown(function(event) {
+    thisPagesInputField.keydown(function(event) {
         var eventNeedsRecording = true;
         var i = keyLog.length;
 
@@ -78,7 +88,7 @@ function monitor( textBox ) {
         }
     });
 
-    $("#inputKeyPhrase").keyup(function(event) {
+    thisPagesInputField.keyup(function(event) {
         // Determine the last instance of this key that was pressed down
         var i; // assume it's the last character
         for( i = keyLog.length - 1; i >= 0; i-- ) {
@@ -127,12 +137,11 @@ function bindKeystrokeListener() {
     bindHelpPopup();
 }
 
-SubmitType = {
-    CREATE : 'formCreate',
-    LOGIN : 'formLogin',
-    TRAIN : 'formTrain'
-}
-
+/**
+ * Clears the specified input field, and focuses the input there.
+ * Also resets all our timing data on that field.
+ * @param inputField The input field to clear
+ */
 function resetFormAndTimingData( inputField ) {
     inputField.val('');
     inputField.focus();
@@ -164,13 +173,20 @@ function getSerializedTimingData() {
 function handleSubmission( submitType ) {
     var form = $( "#" + submitType );
 
-    var timingData = $("#timingData");
-    var phrase = $("#inputKeyPhrase");
+    var suffix = '';
+    if( submitType == SubmitType.DROPDOWN ) {
+        suffix = "Dropdown";
+    }
+
+    var timingData = $("#timingData" + suffix);
+    var phrase = $("#inputKeyPhrase" + suffix);
+
 
     form.submit(function (event) {
         var dataIsOkay = true;
 
-        if( submitType == SubmitType.LOGIN ) {
+        if( submitType == SubmitType.LOGIN
+            || submitType == SubmitType.DROPDOWN ) {
             // Write to diagnostic log
             var theLog = $("#theLog");
             theLog.empty();
@@ -190,6 +206,7 @@ function handleSubmission( submitType ) {
 
         // Add the invisible field which will allow us to send timing data
         if( dataIsOkay ) {
+            alert( keyLog );
             timingData.val(getSerializedTimingData());
             return true;
         }
@@ -206,12 +223,17 @@ function main() {
         thisPagesInputField = $("#" + thisPagesInputFieldId );
         bindKeystrokeListener();
     }
+    if( $("#inputKeyPhraseDropdown").length ) {
+        thisPagesInputFieldId = "inputKeyPhraseDropdown";
+        thisPagesInputField = $("#" + thisPagesInputFieldId );
+        bindKeystrokeListener();
+    }
 
     // Bind the listeners only if there is a log in form
     var formType;
     if( $("#formLogin").length ) {
         thisPagesForm = $("#formLogin");
-        formType = SubmitType.LOGIN ;
+        formType = SubmitType.LOGIN;
     } else if( $("#formCreate").length ) {
         thisPagesForm = $("#formCreate");
         formType = SubmitType.CREATE;
@@ -220,6 +242,12 @@ function main() {
         formType = SubmitType.TRAIN;
     }
     handleSubmission( formType );
+
+    // Could also have the dropdown form on any page
+    if( $("#formLoginDropdown").length ) {
+        thisPagesForm = $("#formLoginDropdown");
+        handleSubmission( SubmitType.DROPDOWN );
+    }
 
     $("#inputKeyPhrase").focus();
 }
