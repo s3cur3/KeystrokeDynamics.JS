@@ -1,6 +1,5 @@
 <?php
 	include_once( '/components/site_variables.php' );
-	global $authenticationPage;
 ?>
 <form class="form-horizontal" name="formLogin" id="formLogin" action="<?php echo $authenticationPage; ?>" method="post">
 	<div class="control-group">

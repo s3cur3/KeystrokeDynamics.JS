@@ -18,13 +18,6 @@
 			<section>
 				<p>Don't have an account yet? <a href="create_account.php">Create one now</a>!</p>
 			</section>
-			
-			<section>
-				<h2>Log</h2>
-				<p id="theLog">
-					<pre></pre>
-				</p>
-			</section>
 		</div><!-- container -->
 		<?php include( 'components/footer.php' ); ?>
 	</body>

@@ -22,14 +22,14 @@ function error( &$errorOccurred=NULL,
  * username/password combination!
  * 
  * @uses the global $_POST data (which contains the keystroke data).
- * @param $errorOccurred Pass in a variable here and we will set it to True if an
- *                       error occurs (i.e., we can't complete the test for some 
- *					 reason).
- * @param $probabilityThatUserIsReal Pass in a variable here and we will set it to
- *                                   an estimated percentage that the user is who
- *                                   they claim to be. Useful for testing purposes.
- * @param $absoluteScore Pass in a variable here and we will set it to the user's
- *                       absolute score. Useful for testing purposes.					 
+ * @optional $errorOccurred Pass in a variable here and we will set it to True if an
+ *                          error occurs (i.e., we can't complete the test for some 
+ *				            reason).
+ * @optional $probabilityThatUserIsReal Pass in a variable here and we will set it to
+ *                                      an estimated percentage that the user is who
+ *                                      they claim to be. Useful for testing purposes.
+ * @optional $absoluteScore Pass in a variable here and we will set it to the user's
+ *                          absolute score. Useful for testing purposes.					 
  * @return True if we judge that this is indeed the real user (i.e., not an imposter)
  * 		   and False if we judge that this is an imposter.
  */
@@ -37,8 +37,6 @@ function is_real_user( &$errorOccurred=NULL,
                        &$probabilityThatUserIsReal=NULL,
 					   &$absoluteScore=NULL ) {
 	$errorOccurred = false;
-	
-	echo "Hello!";
 	
 	$phrase = cleanse_sql_and_html($_POST['inputKeyPhrase']);
 	$phraseDropdown = cleanse_sql_and_html($_POST['inputKeyPhraseDropdown']);
@@ -51,7 +49,6 @@ function is_real_user( &$errorOccurred=NULL,
 
 	// Reconstruct the serialized data
 	if( isset($_POST['timingData' . $idSuffix]) ) {
-		echo "<p>Great! You sent timing data!", $_POST['timingData' . $idSuffix], "</p>";
 		echo "<p>The phrase you entered was <code>" 
 			. $phrase . "</code></p>";
 		

@@ -3,9 +3,9 @@
 $db_hostname = "localhost";
 $db_username = "root";
 $db_password = "NTF96pafzdwy";
-$db_database = "keystroke_data";
-$table_training_data = "training";
-$table_training_output = "training_out";
+$db_database = "keystroke_data"; // the database containing the login data
+$table_training_data = "training"; // the table containing the training data
+$table_training_output = "training_out"; // table containing the finished training model
 
 /* Pages relevant to log-in */
 

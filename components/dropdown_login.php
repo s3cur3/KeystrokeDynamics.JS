@@ -2,7 +2,7 @@
 	include_once( 'site_variables.php' );
 ?>
 <li class="dropdown login-dropdown">
-	<a class="dropdown-toggle" id="login-label" role="button" data-toggle="dropdown" data-target="#" href="#">
+	<a class="dropdown-toggle" id="login-dropdown-button" role="button" data-toggle="dropdown" data-target="#" href="#">
 		Log in
 	<b class="caret"></b>
 	</a>

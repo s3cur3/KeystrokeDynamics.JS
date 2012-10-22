@@ -21,7 +21,7 @@ for database access, login validator page, training page, and post-training page
     - If you're using [Bootstrap][] (with the Bootstrap Javascript, either `bootstrap.min.js` or `bootstrap.js`), you can add a neat drop-down login form by including `dropdown_login.php` in a menu on your page. (See [Example 1][Example 1: A Dropdown Login Form in a Nav Menu].)
 	- To add a "normal" login form to a page, just include
       `components/login.php` somewhere on your page. (See [Example 2][Example 2: A Standard Login Form].)
-5. Create a login validation page. This is the page that users are sent to after they log in. This might be a user's "control panel," your normal home page, or any number of other things. **TODO**: Document this further.
+5. Create a login validation page. This is the page that users are sent to after they log in. This might be a user's "control panel," your normal home page, or any number of other things. What's important is that this page call the `is_real_user()` function, as illustrated in [Example 3][Example 3: A Validation Page].
 6. Create a training page and a training success page. **TODO**: Document this further.
 	
 **Note**: For this code to be a true drop-in solution, you'll need to use it with Twitter [Bootstrap][]. For the most part, you don't *have* to use Bootstrap, but if you don't, you'll have to provide your own CSS styling and maybe your own Javascript animations.
@@ -67,3 +67,33 @@ What follows is an example of a standard (i.e., non-dropdown) login form. If you
 		<?php include( 'components/login.php' ); ?>
 	</section>
 
+## Example 3: A Validation Page ##
+The following is an example of a validation page. This is the page that users get sent to after they input their login credentials. Note that we have a placeholder call to `your_normal_validation_function()`, since our package doesn't necessarily check the username and password against your master password database.
+
+    <body>		
+		<div class="container">
+			<section>
+				<h1>User Home Page</h1>
+	<?php
+				include_once( '/components/login_validator.php' );
+				if( is_real_user() && your_normal_validation_function() ) {
+	?>              
+                    <p>Hello, user!</p>
+	<?php		
+	            } else { // Identified as impostor!
+	?>          
+		            <p>Failed to authenticate you.</p>
+					<p>Perhaps you didn't type your credentials in the way you normally do.</p>
+	<?php		
+	            }
+	?>					
+
+Compatibility notes
+======================
+Our Javascript uses the `Function.prototype.bind()` function, new in
+ECMAScript 5, which is supported in:
+- IE9 and greater
+- Firefox 4 and greater
+- Safari 6 and greater
+- Chrome 7 and greater
+- Opera 12 and greater
