@@ -1,7 +1,7 @@
 <div class="navbar navbar-fixed-top">
 	<div class="navbar-inner">
 		<div class="container">
-			<button type="button"class="btn btn-navbar" data-toggle="collapse" data-target=".nav-collapse">
+			<button type="button" class="btn btn-navbar" data-toggle="collapse" data-target=".nav-collapse">
 				<span class="icon-bar"></span>
 				<span class="icon-bar"></span>
 				<span class="icon-bar"></span>
@@ -21,10 +21,12 @@
 					<li class="">
 						<a href="https://github.com/s3cur3/KeystrokeDynamics.JS/wiki" target="_blank">Wiki</a>
 					</li>
-					<?php include( 'dropdown_login.php' ); ?>
+					<?php
+						include_once( 'login_form.php' );
+						printLoginForm('li', LoginFormType::DropdownShort);
+					?>
 				</ul>
 			</div>
-			
 		</div>
 	</div>
 </div>

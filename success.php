@@ -9,37 +9,34 @@
 	<body data-spy="scroll" data-target=".subnav" data-offset="50">
 		<?php include( 'components/top_menu.php' ); ?>
         <div class="container">
-            <!-- Masthead
-           ================================================== -->
-            <?php include( 'components/branding.php' ); ?>
-			<?php
+            <?php
+                include( 'components/branding.php' );
 				// Set up our variables
-				$phrase = cleanse_sql_and_html( $_POST['inputKeyPhrase'] );
-				$i = intval(cleanse_sql_and_html( $_POST['iteration'] ));
-				$totalStepsInTraining = 15;
+                $i = intval(cleanseSQLAndHTML( $_POST['iteration'] ));
+                $totalStepsInTraining = constant( "NUM_TRAINING_EXAMPLES" ) + 1;
 				
 				// Store previous submission's data in the DB
-				insert_training_data_into_table( $phrase, $_POST['timingData'] );
+                storeTrainingData( $_SESSION['uid'],
+                                                 $_SESSION['username'],
+                                                 $_POST['timingData'] );
 			?>
 			
 			<section>
 				<h2>Account Creation Successful!</h2>
 				<div class="progress">
-					<?php $totalStepsInTraining = 15; ?>
 					<div class="bar" style="width: 100%;">Step <?php echo $totalStepsInTraining ?> of <?php echo $totalStepsInTraining ?></div>
 				</div>
 				<p>Training the system with your data . . .</p>
 				<?php
 					// Get all known data for this user's key phrase
-					$rawTrainingData = getTrainingData( $phrase );
+					$rawTrainingData = getTrainingData( $_SESSION['uid'] );
 					
 					// Format the user's data for the R script
 					$formattedTrainingData = prepareTrainingData( $rawTrainingData );
 					
 					// Write the training data to a CSV file for the R script
 					writeStringToFileForR( $formattedTrainingData, "training_data.csv" );
-					
-					
+
 					// Call the R script for training
 					exec("/usr/bin/Rscript r/trainer.R" . ' 2>&1', $out, $return_status);
 					
@@ -62,16 +59,17 @@
 						. "</pre>" );*/
 					
 					// Store the output from the script (a vector with the trained classification)
-					storeDetectionModel( $phrase, $serializedData );
+					storeDetectionModel( $_SESSION['uid'],
+                                         $_SESSION['username'],
+                                         $serializedData );
 				?>
-				<p>Successfully created your account using key phrase <strong><?php echo $phrase;?></strong>.</p>
+				<p>Successfully created your account using user name <strong><?php echo $_SESSION['username'];?></strong>.</p>
 			</section>
 			
 			<section>
 				<h2>Log</h2>
-				<p id="theLog">
-				<pre>Training data: <?php echo $formattedTrainingData; ?>
-				</p>
+				<p id="theLog"></p>
+				<pre>Training data: <?php echo $formattedTrainingData; ?></pre>
 			</section>
 		</div><!-- container -->
 		<?php include( 'components/footer.php' ); ?>

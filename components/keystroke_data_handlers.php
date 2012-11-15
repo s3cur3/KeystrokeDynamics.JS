@@ -14,7 +14,8 @@ function writeStringToFile( &$content, $fileName, $mode) {
 	}
 	
 	if( !$fp = @fopen($fileName, $mode) ) {
-		echo "Cannot open file ($fileName)";
+		echo "Cannot open file ($fileName). ";
+        echo "File exists? " . (file_exists($fileName) ? "Yes" : "No" );
 		exit;
 	}
 	if( fwrite($fp, $content) === FALSE ) {
@@ -166,19 +167,21 @@ function getCSVHeader( $timingData, $hasRepetitionColumn=true ) {
  *         CSV files on timing data. This is terminated by a newline ("\n").
  */
 function getCSVLineFromTimingData( $timingData, $repetition = -1 ) {
+    define( "MS_TO_SECONDS", 1.0/1000.0 );
+
 	$csv = "";
 	if( $repetition >= 0 ) {
 		$csv .= $repetition . ",";
 	}
-	
-	$csv .= $timingData[0]['timeHeld']; // only care about time held for pos. 0
+
+    // only care about time held for pos. 0
+	$csv .= MS_TO_SECONDS * $timingData[0]['timeHeld'];
 	
 	// For each (other) character in the password . . .
-	$MS_TO_SECONDS = 1.0/1000.0;
 	for( $i = 1; $i < sizeof($timingData); $i++ ) {
-		$dd = $MS_TO_SECONDS * ($timingData[$i]['timeDown'] - $timingData[$i-1]['timeDown']);
-		$ud = $MS_TO_SECONDS * ($timingData[$i]['timeDown'] - $timingData[$i-1]['timeUp']);
-		$h = $MS_TO_SECONDS * ($timingData[$i]['timeHeld']);
+		$dd = MS_TO_SECONDS * ($timingData[$i]['timeDown'] - $timingData[$i-1]['timeDown']);
+		$ud = MS_TO_SECONDS * ($timingData[$i]['timeDown'] - $timingData[$i-1]['timeUp']);
+		$h = MS_TO_SECONDS * ($timingData[$i]['timeHeld']);
 		
 		if( $h < 0 ) 	$h = 0;
 		if( $ud > 1000 ) $ud = 0.1; // some neutral value
@@ -205,7 +208,7 @@ function getCSVLineFromTimingData( $timingData, $repetition = -1 ) {
  *           repetition, hold[0], keydown[1] - keydown[0], keydown[1] - keyup[0], hold[1], . . . , keydown[n] - keydown[n-1], keydown[n] - keyup[n-1], hold[n], keydown[Return] - keydown[n], keydown[Return] - keyup[n], hold[Return] 
  */
 function prepareTrainingData( $rawTrainingData ) {
-	$print_diagnostic = FALSE;
+	$print_diagnostic = false;
 				
 	// Parse the raw data
 	$trainingData = array(); // an array of timing data

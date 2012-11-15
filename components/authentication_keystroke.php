@@ -1,7 +1,7 @@
 <?php
 
-include_once( '/components/keystroke_data_handlers.php' );
-include_once( '/components/site_variables.php' );
+include_once( 'keystroke_data_handlers.php' );
+include_once( 'site_variables.php' );
 
 // Sets an error status for the is_real_user() function.
 // Don't call this directly!!
@@ -33,33 +33,25 @@ function error( &$errorOccurred=NULL,
  * @return True if we judge that this is indeed the real user (i.e., not an imposter)
  * 		   and False if we judge that this is an imposter.
  */
-function is_real_user( &$errorOccurred=NULL,
-                       &$probabilityThatUserIsReal=NULL,
-					   &$absoluteScore=NULL ) {
+function keystrokeDataMatchesUser( &$errorOccurred=NULL,
+                                   &$probabilityThatUserIsReal=NULL,
+					               &$absoluteScore=NULL ) {
 	$errorOccurred = false;
 	
-	$phrase = cleanse_sql_and_html($_POST['inputKeyPhrase']);
-	$phraseDropdown = cleanse_sql_and_html($_POST['inputKeyPhraseDropdown']);
-	
-	$idSuffix = '';
-	if( strlen($phrase) == 0 && strlen($phraseDropdown) > 0 ) {
-		$idSuffix = 'Dropdown';
-		$phrase = $phraseDropdown;
-	}
+	// Figure out whether the password was input in the normal login form or the
+	// dropdown one
+	$phrase = cleanseSQLAndHTML($_POST[KSD_FIELD_NAME]);
 
 	// Reconstruct the serialized data
-	if( isset($_POST['timingData' . $idSuffix]) ) {
+	if( isset($_POST['timingData']) ) {
 		echo "<p>The phrase you entered was <code>" 
 			. $phrase . "</code></p>";
 		
 		// Split the POSTed data on spaces (to get individual keystrokes)
-		$timingData = parseRawTimingData( $_POST['timingData' . $idSuffix] );
-
-		// TODO: Die if the key phrase doesn't match any known
-		
+		$timingData = parseRawTimingData( $_POST['timingData'] );
 		
 		// Write the detection model to a file for use by the authenticator.R script
-		$serializedDetectionModel = getDetectionModel( $phrase );
+		$serializedDetectionModel = getDetectionModel( $_SESSION['uid'], $phrase );
 		$serializedDetectionModel .= "\n";
 		writeStringToFileForR( $serializedDetectionModel, "dmod" );
 		
@@ -72,6 +64,8 @@ function is_real_user( &$errorOccurred=NULL,
 		// Call the R script for validation
 		exec("/usr/bin/Rscript r/authenticator.R " . '2>&1', $out, $returnStatus);
 		
+		echo '<pre>', print_r($out, true), '</pre>';
+		
 		if( $returnStatus === 0 ) {
 			$score = floatval(end($out));
 			$cutoff = 800.0;
@@ -81,7 +75,7 @@ function is_real_user( &$errorOccurred=NULL,
 			$absoluteScore = $score;
 			
 			// Evaluate whether you're an impersonator or not
-			
+			echo "<p>Percent score: $percentScore </p>";
 			if( $percentScore >= 1.0 ) {
 				return false;
 			} else {
@@ -92,6 +86,33 @@ function is_real_user( &$errorOccurred=NULL,
 		}
 	}
 	return error( $errorOccurred, $probabilityThatUserIsReal, $absoluteScore );
+}
+
+/**
+ * @param $userID int The ID of the user for whom we are getting a captcha (this just ensures we don't have the user
+ *                    provide a negative for themselves)
+ * @return string The key phrase of the user we have chosen to get a negative training example for.
+ */
+function getCaptcha( $userID=0 ) {
+    // Select a random user who needs negatives
+    $needNegatives = getUsersWhoNeedNegatives();
+    $selectedUID = array_pop($needNegatives);
+    while( $selectedUID == $userID && !is_null($selectedUID) ) {
+        $selectedUID = array_pop($needNegatives);
+    }
+
+    if( $selectedUID == $userID || is_null($selectedUID) ) {
+        // Didn't have any users who *need* training examples; now we just select a random user
+        $userIDs = getRandomUserIDs();
+
+        $selectedUID = array_pop($userIDs);
+        while( $selectedUID == $userID && !is_null($selectedUID) ) {
+            $selectedUID = array_pop($userIDs);
+        }
+    }
+
+    // Return the key phrase of that user
+    return getKeyPhrase($selectedUID);
 }
 
 ?>

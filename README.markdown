@@ -12,11 +12,12 @@ The source code for this project represents a minimal working example of a site 
 To implement a login form that is aware of keystroke dynamics on your own site, you'll need to do the following:
 
 1. Add the directories `js` and `components` to your own site's root directory.
+2. Set up [uLogin](http://ulogin.sourceforge.net/), a PHP library for authentication, or modify this project's source to work with another authentication library.
 2. In the `components/site_variables.php` file, set up the variables
 for database access, login validator page, training page, and post-training page to match your own site's configuration. (See steps 5 and 6 for more on those special pages.)
-3. Include `js/submitter.js` on any page from which you want to authenticate users or train your detector. Include JQuery (`js/jquery.js`) as well if you don't have it on your pages already. You can do this by placing the following code into your page (probably in the footer somewhere so you don't slow down page load times):
+3. Include `js/KeystrokeDynamics.js` on any page from which you want to authenticate users or train your detector. Include JQuery (`js/jquery.js`) as well if you don't have it on your pages already. You can do this by placing the following code into your page (probably in the footer somewhere so you don't slow down page load times):
 	- `<script src="js/jquery.js"></script>`
-	- `<script src="js/submitter.js"></script>`
+	- `<script src="js/KeystrokeDynamics.js"></script>`
 4. Include login forms wherever you'd like them to go. You can do this in a number of ways.
     - If you're using [Bootstrap][] (with the Bootstrap Javascript, either `bootstrap.min.js` or `bootstrap.js`), you can add a neat drop-down login form by including `dropdown_login.php` in a menu on your page. (See [Example 1][Example 1: A Dropdown Login Form in a Nav Menu].)
 	- To add a "normal" login form to a page, just include

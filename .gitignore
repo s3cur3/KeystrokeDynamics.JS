@@ -63,3 +63,6 @@ r/authenticator_old.R
 *.history
 
 */*.history
+
+ulogin/
+ulogin-examples

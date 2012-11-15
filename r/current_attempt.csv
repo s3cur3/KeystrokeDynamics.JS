@@ -1,2 +1,2 @@
-hold[T],keydown[Y] - keydown[T],keydown[Y] - keyup[T],hold[Y],keydown[L] - keydown[Y],keydown[L] - keyup[Y],hold[L],keydown[E] - keydown[L],keydown[E] - keyup[L],hold[E],keydown[R] - keydown[E],keydown[R] - keyup[E],hold[R]
-95,0.097,0.002,0.109,0.08,-0.029,0.123,0.12,-0.003,0.078,0.03,-0.048,0.112
+hold[L],keydown[U] - keydown[L],keydown[U] - keyup[L],hold[U],keydown[K] - keydown[U],keydown[K] - keyup[U],hold[K],keydown[E] - keydown[K],keydown[E] - keyup[K],hold[E],keydown[S] - keydown[E],keydown[S] - keyup[E],hold[S]
+0.183,0.152,-0.031,0.103,0.217,0.114,0.094,0.176,0.082,0.127,0.031,-0.096,0.159

@@ -12,8 +12,11 @@
             <?php include( 'components/branding.php' ); ?>
 			
 			<section>
-				<h2>Log in</h2>
-				<?php include( 'components/login.php' ); ?>
+                <h2>Please log in</h2>
+				<?php
+					include_once( 'components/login_form.php' );
+					printLoginForm();
+				?>
 			</section>
 			<section>
 				<p>Don't have an account yet? <a href="create_account.php">Create one now</a>!</p>
