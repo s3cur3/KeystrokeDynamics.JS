@@ -41,6 +41,37 @@ function logout(){
 	unset($_SESSION['loggedIn']);
 }
 
+
+/**
+ * Checks the password to determine if it meets the site's guidelines (e.g., the length
+ * is less than the MAX_PASSWORD_LENGTH and greater than or equal to MIN_PASSWORD_LENGTH).
+ * @param $password string The password to examine to see if it meets our requirements
+ * @return bool True if the password passes our checks, false otherwise
+ */
+function passwordMeetsRequirements( $password ) {
+    return( strlen($password) >= MIN_PASSWORD_LENGTH
+            && strlen($password) < MAX_PASSWORD_LENGTH );
+}
+
+/**
+ * Checks the user name to determine if it meets the site's guidelines (e.g., the length
+ * is less than the MAX_USERNAME_LENGTH and greater than or equal to MIN_USERNAME_LENGTH).
+ * @param $username string The username to examine to see if it meets our requirements
+ * @return bool True if the username passes our checks, false otherwise
+ */
+function usernameMeetsRequirements( $username ) {
+    $wordsToCensor = file(SITE_ROOT . "components/badwords.txt", FILE_IGNORE_NEW_LINES);
+    for( $i = 0; $i < sizeof($wordsToCensor); $i++ ) {
+        $wordsToCensor[$i] = '/' . $wordsToCensor[$i] . '/';
+    }
+    preg_replace( $wordsToCensor, "", $username, 1, $censoredWordCount );
+
+    return( strlen($username) >= MIN_USERNAME_LENGTH
+            && strlen($username) < MAX_USERNAME_LENGTH
+            && htmlspecialchars($username) === $username
+            && $censoredWordCount === 0 );
+}
+
 /**
  * Creates a user for the "normal" authentication scheme (i.e., the one
  * using username and password)
@@ -50,16 +81,21 @@ function logout(){
  * @return boolean True if the account was successfully created; false if it failed.
  */
 function createUser( $uLogin, $userName, $password ) {
-    $success = $uLogin->CreateUser( $userName,  $password );
-    $success += attemptLogin(true);
-    if( $success ) {
-        // Need to get the user some negative training examples
-        addUserToNeedsNegativesList( $_SESSION['uid'] );
+    if( usernameMeetsRequirements($userName) && passwordMeetsRequirements($password) ) {
+        $success = $uLogin->CreateUser( $userName,  $password );
+        $success += attemptLogin(true);
+        if( $success ) {
+            // Need to get the user some negative training examples
+            addUserToNeedsNegativesList( $_SESSION['uid'] );
+        }
+        else {
+            echo "Failed!!";
+        }
+        return $success;
+    } else {
+        echo "<p>Failed to create account due to a problem with the username or password.</p>";
+        return false;
     }
-    else {
-        echo "Failed!!";
-    }
-	return $success;
 }
 
 /**
@@ -176,5 +212,5 @@ function deleteUser( $userID ) {
     return $succeeded;
 }
 
-	
+
 ?>

@@ -27,13 +27,6 @@
 <?php
                 $totalStepsInTraining = constant( "NUM_TRAINING_EXAMPLES" ) + 1;
 
-                $nonce = ulNonce::Create('captcha');
-                if( !ulNonce::Verify('captcha', $nonce) ) {
-                    echo "<p>Yup, nonce verification failed!</p>";
-                } else {
-                    echo "Success!";
-                }
-
                 // If we don't have all the POST data that indicates the user has
                 // already typed their info once . . .
                 if( !( isset($_POST['timingData']) && isset($_POST['nonce']) ) ) {
@@ -92,12 +85,12 @@
                     </form>
 <?php
                 } else { // We have all the required data
-                    if( isset($_POST['timingDataCaptcha']) ) {
+                    /*if( isset($_POST['timingDataCaptcha']) ) {
                         echo "<p>Got captcha timing!: " . $_POST['timingDataCaptcha'] . "</p>";
                     }
                     if( isset($_POST['timingData'])) {
                         echo "<p>Got normal timing!: " . $_POST['timingData'] . "</p>";;
-                    }
+                    }*/
                     //echo "<pre>", print_r($_POST, true), "</pre>";
 
                     // If we haven't already logged the user in, we need to
@@ -117,6 +110,7 @@
                                 echo "<p>Sorry, there was an internal error.</p>";
                             }
 
+                            // @TODO: Not safe to exit here!
                             exit();
                         }
                     }
@@ -133,6 +127,7 @@
                         $i = intval(cleanseSQLAndHTML( $_POST['iteration'] ));
 
                         // Store previous submission's data in the DB
+                        //echo "<pre>", print_r($_SESSION), "</pre>";
                         storeTrainingData( $_SESSION['uid'], $_SESSION['username'], $_POST['timingData'] );
                         storeNegativeTrainingData( getUserID($_POST['captcha']), $_SESSION['uid'], $_POST['captcha'],
                                                    $_POST['timingDataCaptcha'] )
@@ -192,8 +187,8 @@
 
 			</section>
             <?php
-            echo "<p>User is logged in? ", ( userIsLoggedIn() ? "Yes" : "No" ),"</p>",
-                 "<p>", "User ID: ", $_SESSION['username'],"</p>"; ?>
+            /*echo "<p>User is logged in? ", ( userIsLoggedIn() ? "Yes" : "No" ),"</p>",
+                 "<p>", "User ID: ", $_SESSION['username'],"</p>"; */?>
 		</div><!-- container -->
 		<?php include( 'components/footer.php' ); ?>
 	</body>

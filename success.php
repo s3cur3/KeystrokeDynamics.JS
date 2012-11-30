@@ -65,12 +65,6 @@
 				?>
 				<p>Successfully created your account using user name <strong><?php echo $_SESSION['username'];?></strong>.</p>
 			</section>
-			
-			<section>
-				<h2>Log</h2>
-				<p id="theLog"></p>
-				<pre>Training data: <?php echo $formattedTrainingData; ?></pre>
-			</section>
 		</div><!-- container -->
 		<?php include( 'components/footer.php' ); ?>
 	</body>

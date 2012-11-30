@@ -84,7 +84,7 @@ function create_tables() {
  */
 function storeTrainingData( $userID, $keyPhrase, $timingData ) {
 	global $db_hostname, $db_username, $db_password, $db_database, $table_training_data, $table_training_output;
-	
+
 	$db_server = mysql_connect( $db_hostname, $db_username, $db_password );
 	if ( !$db_server ) die( "<p>Unable to connect to MySQL: " . mysql_error() . '</p>' );
 	
@@ -118,7 +118,9 @@ function storeTrainingData( $userID, $keyPhrase, $timingData ) {
  */
 function addUserToNeedsNegativesList( $userID ) {
 	global $db_hostname, $db_username, $db_password, $db_database, $table_users_in_need_of_negatives;
-	
+
+    if( $userID == 0 ) die("<p>Error: user with ID 0 cannot require negatives.</p>");
+
 	$db_server = mysql_connect( $db_hostname, $db_username, $db_password );
 	if ( !$db_server ) die( "<p>Unable to connect to MySQL: " . mysql_error() . '</p>' );
 	
@@ -373,7 +375,9 @@ function getRandomUserIDs() {
  */
 function getTrainingData( $userID ) {
 	global $db_hostname, $db_username, $db_password, $db_database, $table_training_data, $table_training_output;
-	
+
+    if( $userID == 0 ) die("<p>Error: training data for user with ID 0 is undefined.</p>");
+
 	$db_server = mysql_connect( $db_hostname, $db_username, $db_password );
 	if ( !$db_server ) die( "<p>Unable to connect to MySQL: " . mysql_error() . '</p>' );
 	
@@ -458,7 +462,9 @@ function dump_training_data() {
  */
 function storeDetectionModel( $userID, $key_phrase, $output ) {
 	global $db_hostname, $db_username, $db_password, $db_database, $table_training_data, $table_training_output;
-	
+
+    if( $userID == 0 ) die("<p>Error: user with ID 0 is undefined.</p>");
+
 	$db_server = mysql_connect( $db_hostname, $db_username, $db_password );
 	if ( !$db_server ) die( "<p>Unable to connect to MySQL: " . mysql_error() . '</p>' );
 	
@@ -504,7 +510,9 @@ function storeDetectionModel( $userID, $key_phrase, $output ) {
  */
 function getDetectionModel( $user_id ) {
 	global $db_hostname, $db_username, $db_password, $db_database, $table_training_data, $table_training_output;
-	
+
+    if( $user_id == 0 ) die("<p>Error: detection model for user with ID 0 is undefined.</p>");
+
 	$db_server = mysql_connect( $db_hostname, $db_username, $db_password );
 	if ( !$db_server ) die( "<p>Unable to connect to MySQL: " . mysql_error() . '</p>' );
 	
@@ -543,6 +551,8 @@ function getDetectionModel( $user_id ) {
  */
 function getKeyPhrase( $userID ) {
     global $db_hostname, $db_username, $db_password, $db_database, $table_training_data;
+
+    if( $userID == 0 ) die("<p>Error: key phrase for user with ID 0 is undefined.</p>");
 
     $db_server = mysql_connect( $db_hostname, $db_username, $db_password );
     if ( !$db_server ) die( "<p>Unable to connect to MySQL: " . mysql_error() . '</p>' );
@@ -612,6 +622,39 @@ function getUserID( $keyPhrase ) {
     // xyz in the current query.
     extract($r);
     return $user_id; // the value from the column "user_id" in the SQL query
+}
+
+function getNumTrainingExamples($userID) {
+    global $db_hostname, $db_username, $db_password, $db_database, $table_training_data;
+    $db_server = mysql_connect( $db_hostname, $db_username, $db_password );
+    if ( !$db_server ) die( "<p>Unable to connect to MySQL: " . mysql_error() . '</p>' );
+
+    // Select the keystroke database
+    mysql_select_db( $db_database ) or die( "Unable to select database: " . mysql_error() );
+
+
+    // Prevent SQL injection by using a placeholder query
+    $placeholder_query = 'PREPARE selection FROM "SELECT COUNT(*) from `'. $table_training_data . '` WHERE `user_id` = ?;"';
+    mysql_query( $placeholder_query );
+
+    $set_query = 'SET @user_id = "' . $userID . '";';
+    mysql_query( $set_query );
+
+    $execute_query = 'EXECUTE selection USING @user_id;';
+    $result = mysql_query( $execute_query ) or die( "<p>Error querying the database.</p>");
+
+    $deallocate_query = 'DEALLOCATE PREPARE selection;';
+    mysql_query( $deallocate_query );
+
+
+    // The result we got was just a resource handle on the SQL Server
+    // Have to construct an array for the results
+    $r = mysql_fetch_array($result);
+
+    // Close the connection to the MySQL server
+    mysql_close( $db_server );
+
+    return $r[0];
 }
 
 ?>

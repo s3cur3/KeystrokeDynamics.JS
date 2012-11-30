@@ -1,2 +1,2 @@
-hold[L],keydown[U] - keydown[L],keydown[U] - keyup[L],hold[U],keydown[K] - keydown[U],keydown[K] - keyup[U],hold[K],keydown[E] - keydown[K],keydown[E] - keyup[K],hold[E],keydown[S] - keydown[E],keydown[S] - keyup[E],hold[S]
-0.183,0.152,-0.031,0.103,0.217,0.114,0.094,0.176,0.082,0.127,0.031,-0.096,0.159
+hold[J],keydown[O] - keydown[J],keydown[O] - keyup[J],hold[O],keydown[H] - keydown[O],keydown[H] - keyup[O],hold[H],keydown[N] - keydown[H],keydown[N] - keyup[H],hold[N],keydown[D] - keydown[N],keydown[D] - keyup[N],hold[D],keydown[O] - keydown[D],keydown[O] - keyup[D],hold[O],keydown[E] - keydown[O],keydown[E] - keyup[O],hold[E],keydown[1] - keydown[E],keydown[1] - keyup[E],hold[1],keydown[2] - keydown[1],keydown[2] - keyup[1],hold[2],keydown[3] - keydown[2],keydown[3] - keyup[2],hold[3]
+0.157,0.096,-0.061,0.191,0.182,-0.009,0.104,0.222,0.118,0.104,0.148,0.044,0.105,0.077,-0.028,0.106,0.165,0.059,0.107,0.39,0.283,0.205,0.081,-0.124,0.213,0.125,-0.088,0.129

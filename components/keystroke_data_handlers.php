@@ -243,4 +243,40 @@ function prepareTrainingData( $rawTrainingData ) {
 	
 	return $csv;
 }
+
+function displayKeystrokeDataFromPOST() {
+?>
+    <table width="80%" border="1" cellpadding="5px">
+        <tr>
+            <th scope="col">Character</th>
+            <th scope="col">Key Code</th>
+            <th scope="col">Time Down</th>
+            <th scope="col">Time Up</th>
+            <th scope="col">Time Held</th>
+        </tr>
+<?php
+        $phrase = cleanseSQLAndHTML($_POST['inputKeyPhrase']);
+        $phraseDropdown = cleanseSQLAndHTML($_POST['inputKeyPhraseDropdown']);
+        $idSuffix = '';
+        if( strlen($phrase) == 0 && strlen($phraseDropdown) > 0 ) {
+            $idSuffix = 'Dropdown';
+            $phrase = $phraseDropdown;
+        }
+        $timingData = parseRawTimingData($_POST['timingData'.$idSuffix]);
+        foreach( $timingData as $key ) {
+            ?>
+        <tr>
+            <td><?php echo  $key['character']; ?></td>
+            <td><?php echo  $key['keyCode']; ?></td>
+            <td><?php echo  $key['timeDown']; ?></td>
+            <td><?php echo  $key['timeUp']; ?></td>
+            <td><?php echo  $key['timeHeld']; ?></td>
+        </tr>
+        <?php
+        }
+?>
+    </table>
+<?php
+}
+
 ?>

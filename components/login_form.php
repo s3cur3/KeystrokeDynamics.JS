@@ -22,7 +22,8 @@ final class LoginFormType
 function printLoginForm( $containerType='', $typeOfLogin=LoginFormType::Standard ) {
 	$suffix = '';
     $formClass = "form-horizontal";
-	$nonceType = "login";
+
+	$nonceType = "login" . strval(rand());
 	if( $typeOfLogin===LoginFormType::DropdownLong || $typeOfLogin===LoginFormType::DropdownShort ) {
 		$suffix = 'Dropdown';
         $formClass = "dropdown-menu";
@@ -41,7 +42,7 @@ function printLoginForm( $containerType='', $typeOfLogin=LoginFormType::Standard
 ?>
     <form class="<?php echo $formClass; ?>" name="formLogin<?php echo $suffix; ?>" id="formLogin<?php echo $suffix; ?>" action="<?php echo AUTHENTICATION_PAGE; ?>" method="post">
 <?php
-        if( $typeOfLogin!==LoginFormType::DropdownShort ) { // The short dropdown form is different from all others
+        if( $typeOfLogin !== LoginFormType::DropdownShort ) { // The short dropdown form is different from all others
 ?>
             <div class="control-group">
                 <label class="control-label" for="userName<?php echo $suffix; ?>">User name:</label>

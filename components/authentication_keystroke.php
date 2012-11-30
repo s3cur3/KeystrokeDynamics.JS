@@ -44,8 +44,8 @@ function keystrokeDataMatchesUser( &$errorOccurred=NULL,
 
 	// Reconstruct the serialized data
 	if( isset($_POST['timingData']) ) {
-		echo "<p>The phrase you entered was <code>" 
-			. $phrase . "</code></p>";
+		/*echo "<p>The phrase you entered was <code>"
+			. $phrase . "</code></p>";*/
 		
 		// Split the POSTed data on spaces (to get individual keystrokes)
 		$timingData = parseRawTimingData( $_POST['timingData'] );
@@ -64,7 +64,7 @@ function keystrokeDataMatchesUser( &$errorOccurred=NULL,
 		// Call the R script for validation
 		exec("/usr/bin/Rscript r/authenticator.R " . '2>&1', $out, $returnStatus);
 		
-		echo '<pre>', print_r($out, true), '</pre>';
+		//echo '<pre>', print_r($out, true), '</pre>';
 		
 		if( $returnStatus === 0 ) {
 			$score = floatval(end($out));
@@ -75,7 +75,7 @@ function keystrokeDataMatchesUser( &$errorOccurred=NULL,
 			$absoluteScore = $score;
 			
 			// Evaluate whether you're an impersonator or not
-			echo "<p>Percent score: $percentScore </p>";
+			//echo "<p>Percent score: $percentScore </p>";
 			if( $percentScore >= 1.0 ) {
 				return false;
 			} else {
@@ -101,18 +101,23 @@ function getCaptcha( $userID=0 ) {
         $selectedUID = array_pop($needNegatives);
     }
 
-    if( $selectedUID == $userID || is_null($selectedUID) ) {
+    if( $selectedUID == $userID || is_null($selectedUID) || $selectedUID == 0 ) {
         // Didn't have any users who *need* training examples; now we just select a random user
         $userIDs = getRandomUserIDs();
 
         $selectedUID = array_pop($userIDs);
-        while( $selectedUID == $userID && !is_null($selectedUID) ) {
-            $selectedUID = array_pop($userIDs);
-        }
+    }
+
+    if( $selectedUID == 0 ) { // Probably indicates no known users.
+        return "helloWorld";
     }
 
     // Return the key phrase of that user
-    return getKeyPhrase($selectedUID);
+    $keyPhrase = getKeyPhrase($selectedUID);
+    if( $keyPhrase == "" ) {
+        $keyPhrase = "helloWorld";
+    }
+    return $keyPhrase;
 }
 
 ?>
